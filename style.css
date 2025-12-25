@@ -70,6 +70,8 @@ textarea:not([rows]) {
   font-display: swap;
 }
 
+/* DESIGN SYSTEM */
+
 :root {
   --clr-blue300: 178 75% 65%;
   --clr-blue400: 178 60% 48%;
@@ -82,6 +84,7 @@ textarea:not([rows]) {
   --clr-silver500: 199 17% 51%;
   --clr-navy700: 199 35% 19%;
   --clr-navy800: 202 32% 15%;
+  --clr-navy900: 201 45% 11%;
 
   --fw-medium: 500;
   --fw-bold: 700;
@@ -93,6 +96,8 @@ body {
   font-size: 0.875rem;
   letter-spacing: 0.05rem;
   line-height: 1.3;
+  color: hsl(var(--clr-silver400));
+  background-color: hsl(var(--clr-navy800));
 }
 
 .heading {
@@ -186,4 +191,39 @@ body {
 
 .secondary-button-2:hover {
   background-color: hsl(var(--clr-silver300));
+}
+
+/* DESIGN */
+
+.app {
+    padding: 1.25rem;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.grid {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: repeat(3, 6rem);
+  width: max-content;
+}
+
+.cell {
+  display: block;
+  border: none;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  padding-bottom: calc(1.5rem + 0.5rem);
+  aspect-ratio: 1;
+
+  font-size: 1.25rem;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.06em;
+
+  cursor: pointer;
+
+  background-color: hsl(var(--clr-navy700));
+  box-shadow: inset 0 -0.25rem hsl(var(--clr-navy900));
 }
