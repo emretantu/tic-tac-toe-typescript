@@ -49,6 +49,7 @@ img, picture {
 input, button, textarea, select {
   font-family: inherit;
   font-size: inherit;
+  letter-spacing: inherit;
 }
 
 textarea:not([rows]) {
@@ -62,12 +63,127 @@ textarea:not([rows]) {
 /* Font Declaration */
 
 @font-face {
-  font-family: "NAME";
-  src: url("") format("woff2"),
-       url("") format("woff"),
-       url("") format('truetype');
+  font-family: "Outfit";
+  src: url("./fonts/outfit.ttf") format('truetype');
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
 }
 
+:root {
+  --clr-blue300: 178 75% 65%;
+  --clr-blue400: 178 60% 48%;
+  --clr-blue500: 178 78% 31%;
+  --clr-orange300: 39 100% 69%;
+  --clr-orange400: 39 88% 58%;
+  --clr-orange500: 39 83% 44%;
+  --clr-silver300: 197 33% 89%;
+  --clr-silver400: 198 23% 72%;
+  --clr-silver500: 199 17% 51%;
+  --clr-navy700: 199 35% 19%;
+  --clr-navy800: 202 32% 15%;
+
+  --fw-medium: 500;
+  --fw-bold: 700;
+}
+
+body {
+  font-family: "Outfit", sans-serif;
+  font-weight: var(--fw-medium);
+  font-size: 0.875rem;
+  letter-spacing: 0.05rem;
+  line-height: 1.3;
+}
+
+.heading {
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.06em;
+}
+
+.heading-l {
+  font-size: 2.5rem;
+}
+
+.heading-m {
+  font-size: 1.5rem;
+}
+
+.heading-s {
+  font-size: 1.25rem;
+}
+
+.heading-xs {
+  font-size: 1rem;
+}
+
+/* Common primary button properties */
+.button-1, .button-2 {
+  display: block;
+  border: none;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  padding-bottom: calc(1.5rem + 0.5rem);
+  width: max-content;
+
+  font-size: 1.25rem;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.06em;
+
+  cursor: pointer;
+}
+
+.button-1 {
+  color: hsl(var(--clr-navy800));
+  background-color: hsl(var(--clr-orange400));
+  box-shadow: inset 0 -0.5rem hsl(var(--clr-orange500));
+}
+
+.button-2 {
+  color: hsl(var(--clr-navy800));
+  background-color: hsl(var(--clr-blue400));
+  box-shadow: inset 0 -0.5rem hsl(var(--clr-blue500));
+}
+
+.button-1:hover {
+  background-color: hsl(var(--clr-orange300));
+}
+
+.button-2:hover {
+  background-color: hsl(var(--clr-blue300));
+}
+
+/* Common secondary button properties */
+.secondary-button-1, .secondary-button-2 {
+  display: block;
+  border: none;
+  border-radius: 0.6rem;
+  padding: 1.25rem;
+  padding-bottom: calc(1.25rem + 0.25rem);
+  width: max-content;
+
+  font-size: 1rem;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.06em;
+
+  cursor: pointer;
+}
+
+.secondary-button-1 {
+  color: hsl(var(--clr-navy800));
+  background-color: hsl(var(--clr-orange400));
+  box-shadow: inset 0 -0.25rem hsl(var(--clr-orange500));
+}
+
+.secondary-button-2 {
+  color: hsl(var(--clr-navy800));
+  background-color: hsl(var(--clr-silver400));
+  box-shadow: inset 0 -0.25rem hsl(var(--clr-silver500));
+}
+
+.secondary-button-1:hover {
+  background-color: hsl(var(--clr-orange300));
+}
+
+.secondary-button-2:hover {
+  background-color: hsl(var(--clr-silver300));
+}
