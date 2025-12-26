@@ -295,5 +295,24 @@ body {
 
   background-color: hsl(var(--clr-navy700));
   box-shadow: inset 0 -0.25rem hsl(var(--clr-navy900));
+
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 2.5rem;
 }
 
+.cell.o-marked {
+  background-image: url(./assets/icon-o.svg);
+}
+
+.cell.x-marked {
+  background-image: url(./assets/icon-x.svg);
+}
+
+.grid.o-turn > .cell:not(.o-marked):not(.x-marked):hover {
+  background-image: url(./assets/icon-o-outline.svg);
+}
+
+.grid.x-turn > .cell:not(.o-marked):not(.x-marked):hover {
+  background-image: url(./assets/icon-x-outline.svg);
+}
