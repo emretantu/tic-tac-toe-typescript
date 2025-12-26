@@ -316,3 +316,32 @@ body {
 .grid.x-turn > .cell:not(.o-marked):not(.x-marked):hover {
   background-image: url(./assets/icon-x-outline.svg);
 }
+
+.x-wins, .ties, .o-wins {
+  border-radius: 0.6rem;
+  padding: 1rem 1.25rem;
+  color: hsl(var(--clr-navy800));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: default;
+  line-height: 1;
+}
+
+.x-wins {
+  background-color: hsl(var(--clr-blue400));
+}
+
+.ties {
+  background-color: hsl(var(--clr-silver400));
+}
+
+.o-wins {
+  background-color: hsl(var(--clr-orange400));
+}
+
+.count {
+  font-size: 1.25rem;
+  letter-spacing: 0.06em;
+  font-weight: var(--fw-bold);
+}
