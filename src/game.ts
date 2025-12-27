@@ -62,6 +62,9 @@ const checkWinner = (
 
 // UI/UX
 
+const modal = document.querySelector<HTMLDialogElement>("dialog");
+modal!.showModal();
+
 const appElement = document.querySelector<HTMLElement>(".app");
 const gridElement = document.querySelector<HTMLElement>(".app .grid");
 

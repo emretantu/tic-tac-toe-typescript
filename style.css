@@ -124,6 +124,7 @@ body {
 /* Common primary button properties */
 .button-1, .button-2 {
   display: block;
+  outline: none;
   border: none;
   border-radius: 1rem;
   padding: 1.5rem;
@@ -160,6 +161,7 @@ body {
 /* Common secondary button properties */
 .secondary-button-1, .secondary-button-2 {
   display: block;
+  outline: none;
   border: none;
   border-radius: 0.6rem;
   padding: 1.25rem;
@@ -372,4 +374,85 @@ body {
   font-size: 1.25rem;
   letter-spacing: 0.06em;
   font-weight: var(--fw-bold);
+}
+
+dialog {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  max-width: none;
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+
+  background-color: hsl(var(--clr-navy700));
+  border: none;
+}
+
+dialog::backdrop {
+  background-color: hsla(0, 0%, 0%, 0.6);
+}
+
+.model-content {
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.model-content .message {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.model-content .message .sub {
+  text-align: center;
+  color: hsl(var(--clr-silver400));
+  font-size: 0.875rem;
+  letter-spacing: 0.06em;
+}
+
+.model-content .message .main {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  color: hsl(var(--clr-silver400)); /* Default */
+  font-size: 1.5rem;
+  letter-spacing: 0.06em;
+}
+
+.model-content .message.x-takes .main .img,
+.model-content .message.o-takes .main .img {
+  --size: 1.875rem;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: var(--size);
+  width: var(--size);
+  height: var(--size);
+}
+
+.model-content .buttons {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.model-content .message.x-takes .main {
+  color: hsl(var(--clr-blue400));
+}
+
+.model-content .message.x-takes .main .img {
+  background-image: url(./assets/icon-x.svg);
+}
+
+.model-content .message.o-takes .main {
+  color: hsl(var(--clr-orange400));
+}
+
+.model-content .message.o-takes .main .img {
+  background-image: url(./assets/icon-o.svg);
 }

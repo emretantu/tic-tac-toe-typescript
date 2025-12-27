@@ -31,6 +31,8 @@ const checkWinner = (gameState) => {
     gameState.status = Status.Ongoing;
     return null;
 };
+const modal = document.querySelector("dialog");
+modal.showModal();
 const appElement = document.querySelector(".app");
 const gridElement = document.querySelector(".app .grid");
 const createCellElement = (id, isOMarked, isXMarked, isHighlighted) => {
