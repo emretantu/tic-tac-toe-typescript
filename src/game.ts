@@ -21,7 +21,9 @@ type GameState = {
   currentPlayer: Player,
   xScore: number,
   oScore: number,
-  tieScore: number
+  tieScore: number,
+  xPlayer: string,
+  oPlayer: string
 }
 
 // const makeMove = (
@@ -63,7 +65,12 @@ const checkWinner = (
 // UI/UX
 
 const modal = document.querySelector<HTMLDialogElement>("dialog");
-modal!.showModal();
+
+enum ModalStatus {
+  Notr = "notr",
+  XTakes = "x-takes",
+  OTakes = "o-takes"
+}
 
 const createModalContent = (
   sub: string,
@@ -72,14 +79,15 @@ const createModalContent = (
   button1Text: string,
   button2Callback: Function,
   button1Callback: Function,
-  status: "notr" | "x-takes" | "o-takes"
+  modalStatus: ModalStatus
 ): HTMLElement => {
   const wrapper = document.createElement('div');
   wrapper.className = 'modal-content';
 
+
   wrapper.innerHTML = `
-    <div class="message ${status === "notr" ? "" : status}">
-      ${sub ? '<p class="sub">${sub}</p>' : ""}
+    <div class="message ${modalStatus === "notr" ? "" : modalStatus}">
+      ${sub ? `<p class="sub">${sub}</p>` : ""}
       <div class="main">
         <div class="img"></div>
         <p class="message-text">${message}</p>
@@ -100,9 +108,24 @@ const createModalContent = (
   return wrapper;
 }
 
-const openModal = (modalContent: HTMLElement, modal: HTMLElement) => {
+const openModal = (modalContent: HTMLElement, modal: HTMLDialogElement) => {
   modal?.replaceChildren(modalContent);
+  modal.showModal();
 }
+
+// openModal(
+//   createModalContent(
+//     "", 
+//     "TEST MESSAGE", 
+//     "kapat", 
+//     "sıradaki round", 
+//     () => modal?.close(), 
+//     () => console.log("Button 1 Clicked"), 
+//     "notr"
+//   ),
+//   modal as HTMLDialogElement
+// )
+
 
 const appElement = document.querySelector<HTMLElement>(".app");
 const gridElement = document.querySelector<HTMLElement>(".app .grid");
@@ -195,6 +218,13 @@ const setTurn = (whoseTurn: Player): void => {
   }
 }
 
+const xPlayerNameElement = document.querySelector<HTMLElement>(".x-wins .name");
+const oPlayerNameElement = document.querySelector<HTMLElement>(".o-wins .name");
+const setPlayerName = (gameState: GameState) => {
+  xPlayerNameElement!.innerHTML = `X (${gameState.xPlayer})`;
+  oPlayerNameElement!.innerHTML = `O (${gameState.oPlayer})`;
+}
+
 const xScoreElement = document.querySelector<HTMLElement>(".x-wins .count");
 const oScoreElement = document.querySelector<HTMLElement>(".o-wins .count");
 const tieScoreElement = document.querySelector<HTMLElement>(".ties .count");
@@ -202,6 +232,55 @@ const setScore = (gameState: GameState) => {
   xScoreElement!.innerHTML = gameState.xScore.toString();
   oScoreElement!.innerHTML = gameState.oScore.toString();
   tieScoreElement!.innerHTML = gameState.tieScore.toString();
+}
+
+const resolveRoundEnd = (gameState: GameState, cellElements: HTMLElement[]) => {
+  const button2Callback = () => {
+    nextRound(gameState);
+    nextTurn(gameState, cellElements);
+    modal?.close()
+  }
+  const button1Callback = () => {
+    modal?.close()
+  }
+  const button2Text = "QUIT";
+  const button1Text = "NEXT ROUND";
+  let sub = "";
+  let message = "";
+  let modalStatus = ModalStatus.Notr;
+
+  switch (gameState.status) {
+    case Status.Tie:
+      sub = "";
+      message = "ROUND TIED";
+      modalStatus = ModalStatus.Notr
+      break;
+
+    case Status.XWins:
+      sub = gameState.xPlayer.toUpperCase() + " WINS!";
+      message = "TAKES THE ROUND";
+      modalStatus = ModalStatus.XTakes
+      break;
+
+    case Status.OWins:
+      sub = gameState.oPlayer.toUpperCase() + " WINS!";;
+      message = "TAKES THE ROUND";
+      modalStatus = ModalStatus.OTakes
+      break;
+  }
+
+  openModal(
+    createModalContent(
+      sub, 
+      message, 
+      button2Text, 
+      button1Text, 
+      button1Callback, 
+      button2Callback, 
+      modalStatus
+    ),
+    modal as HTMLDialogElement
+  );
 }
 
 const nextRound = (gameState: GameState): void => {
@@ -239,8 +318,7 @@ const nextTurn = (
   setTurn(gameState.currentPlayer);
   
   if (gameState.status !== Status.Ongoing) {
-    nextRound(gameState);
-    nextTurn(gameState, cellElements);
+    resolveRoundEnd(gameState, cellElements);
   }
 }
 
@@ -256,7 +334,10 @@ const startGame = (): void => {
     xScore: 0,
     oScore: 0,
     tieScore: 0,
+    xPlayer: "P1",
+    oPlayer: "P2"
   }
+  setPlayerName(gameState);
   setScore(gameState);
   nextTurn(gameState, []);
 }

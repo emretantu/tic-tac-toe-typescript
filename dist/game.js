@@ -32,13 +32,18 @@ const checkWinner = (gameState) => {
     return null;
 };
 const modal = document.querySelector("dialog");
-modal.showModal();
-const createModalContent = (sub, message, button2Text, button1Text, button2Callback, button1Callback, status) => {
+var ModalStatus;
+(function (ModalStatus) {
+    ModalStatus["Notr"] = "notr";
+    ModalStatus["XTakes"] = "x-takes";
+    ModalStatus["OTakes"] = "o-takes";
+})(ModalStatus || (ModalStatus = {}));
+const createModalContent = (sub, message, button2Text, button1Text, button2Callback, button1Callback, modalStatus) => {
     const wrapper = document.createElement('div');
     wrapper.className = 'modal-content';
     wrapper.innerHTML = `
-    <div class="message ${status === "notr" ? "" : status}">
-      ${sub ? '<p class="sub">${sub}</p>' : ""}
+    <div class="message ${modalStatus === "notr" ? "" : modalStatus}">
+      ${sub ? `<p class="sub">${sub}</p>` : ""}
       <div class="main">
         <div class="img"></div>
         <p class="message-text">${message}</p>
@@ -57,6 +62,7 @@ const createModalContent = (sub, message, button2Text, button1Text, button2Callb
 };
 const openModal = (modalContent, modal) => {
     modal === null || modal === void 0 ? void 0 : modal.replaceChildren(modalContent);
+    modal.showModal();
 };
 const appElement = document.querySelector(".app");
 const gridElement = document.querySelector(".app .grid");
@@ -135,6 +141,12 @@ const setTurn = (whoseTurn) => {
         appElement === null || appElement === void 0 ? void 0 : appElement.classList.add("o-turn");
     }
 };
+const xPlayerNameElement = document.querySelector(".x-wins .name");
+const oPlayerNameElement = document.querySelector(".o-wins .name");
+const setPlayerName = (gameState) => {
+    xPlayerNameElement.innerHTML = `X (${gameState.xPlayer})`;
+    oPlayerNameElement.innerHTML = `O (${gameState.oPlayer})`;
+};
 const xScoreElement = document.querySelector(".x-wins .count");
 const oScoreElement = document.querySelector(".o-wins .count");
 const tieScoreElement = document.querySelector(".ties .count");
@@ -142,6 +154,40 @@ const setScore = (gameState) => {
     xScoreElement.innerHTML = gameState.xScore.toString();
     oScoreElement.innerHTML = gameState.oScore.toString();
     tieScoreElement.innerHTML = gameState.tieScore.toString();
+};
+const resolveRoundEnd = (gameState, cellElements) => {
+    const button2Callback = () => {
+        nextRound(gameState);
+        nextTurn(gameState, cellElements);
+        modal === null || modal === void 0 ? void 0 : modal.close();
+    };
+    const button1Callback = () => {
+        modal === null || modal === void 0 ? void 0 : modal.close();
+    };
+    const button2Text = "QUIT";
+    const button1Text = "NEXT ROUND";
+    let sub = "";
+    let message = "";
+    let modalStatus = ModalStatus.Notr;
+    switch (gameState.status) {
+        case Status.Tie:
+            sub = "";
+            message = "ROUND TIED";
+            modalStatus = ModalStatus.Notr;
+            break;
+        case Status.XWins:
+            sub = gameState.xPlayer.toUpperCase() + " WINS!";
+            message = "TAKES THE ROUND";
+            modalStatus = ModalStatus.XTakes;
+            break;
+        case Status.OWins:
+            sub = gameState.oPlayer.toUpperCase() + " WINS!";
+            ;
+            message = "TAKES THE ROUND";
+            modalStatus = ModalStatus.OTakes;
+            break;
+    }
+    openModal(createModalContent(sub, message, button2Text, button1Text, button1Callback, button2Callback, modalStatus), modal);
 };
 const nextRound = (gameState) => {
     gameState.board = [
@@ -176,8 +222,7 @@ const nextTurn = (gameState, previousCellElements) => {
     drawBoard(cellElements);
     setTurn(gameState.currentPlayer);
     if (gameState.status !== Status.Ongoing) {
-        nextRound(gameState);
-        nextTurn(gameState, cellElements);
+        resolveRoundEnd(gameState, cellElements);
     }
 };
 const startGame = () => {
@@ -192,7 +237,10 @@ const startGame = () => {
         xScore: 0,
         oScore: 0,
         tieScore: 0,
+        xPlayer: "P1",
+        oPlayer: "P2"
     };
+    setPlayerName(gameState);
     setScore(gameState);
     nextTurn(gameState, []);
 };
