@@ -49,19 +49,9 @@ const checkWinner = (
   return Status.Ongoing;
 };
 
-// GAME RULES
-
-const board: Board = [
-  Player.X, null, null,
-  null, null, Player.O,
-  null, null, null
-]
-let status: Status = Status.Ongoing;
-let currentPlayer: Player = Player.X;
-const gameState: GameState = {board, status, currentPlayer}
-
 // UI/UX
 
+const appElement = document.querySelector<HTMLElement>(".app");
 const gridElement = document.querySelector<HTMLElement>(".app .grid");
 
 const createCellElement = (
@@ -88,17 +78,93 @@ const createCellElement = (
   return element;
 }
 
-const cellElements = board.map((cell, index) => {
-  if (cell === Player.X) {
-    return createCellElement(index, false, true, false);
+const createCellElements = (gameState: GameState, previousCellElements: HTMLElement[]): HTMLElement[] => {
+  const cellElements = gameState.board.map((cell, index) => {
+    let cellElement;
+    if (cell === Player.X) {
+      cellElement = createCellElement(index, false, true, false);
+    }
+    else if (cell === Player.O) {
+      cellElement = createCellElement(index, true, false, false);
+    } else {
+      cellElement = createCellElement(index, false, false, false);
+    }
+    cellElement.addEventListener("click", (event) => {
+      const targetElement = event.target as HTMLElement;
+      let targetElementId: number = parseInt(targetElement.dataset.cellId as string);
+      const newGameState = markCell(gameState, targetElementId, previousCellElements);
+    })
+    return cellElement;
+  });
+  previousCellElements = cellElements;
+  return cellElements;
+}
+
+const drawBoard = (cellElements: HTMLElement[]): void => {
+  const reversedElements = cellElements.reverse();
+  reversedElements.forEach(cellElement => {
+    gridElement?.prepend(cellElement);
+  });
+}
+
+const clearBoard = (cellElements: HTMLElement[]): void => {
+  cellElements.forEach(cellElement => {
+    cellElement.remove();
+  })
+}
+
+const markCell = (gameState: GameState, id: number, previousCellElements: HTMLElement[]): void => {
+  if (gameState.board[id] === null) {
+    gameState.board[id] = gameState.currentPlayer;
+    gameState.currentPlayer = gameState.currentPlayer === Player.X ? Player.O : Player.X;
   }
-  if (cell === Player.O) {
-    return createCellElement(index, true, false, false);
+  console.log(gameState);
+  nextTurn(gameState, previousCellElements);
+}
+
+const setTurn = (whoseTurn: Player): void => {
+  if (whoseTurn === Player.X) {
+    appElement?.classList.remove("o-turn");
+    appElement?.classList.add("x-turn");
+  } else {
+    appElement?.classList.remove("x-turn");
+    appElement?.classList.add("o-turn");
   }
-  return createCellElement(index, false, false, false);
-});
+}
+
+const nextTurn = (
+  gameState: GameState,
+  previousCellElements: HTMLElement[]
+): void => {
+  const cellElements = createCellElements(gameState, previousCellElements);
+  if (previousCellElements.length > 0) {
+    clearBoard(previousCellElements);
+  }
+  drawBoard(cellElements);
+  setTurn(gameState.currentPlayer);
+}
+
+const startGame = (): void => {
+  const gameState: GameState = {
+    board: [
+      null, null, null,
+      null, null, null,
+      null, null, null
+    ],
+    status: Status.Ongoing,
+    currentPlayer: Player.X
+  }
+  nextTurn(gameState, []);
+}
+
+startGame();
 
 
-cellElements.forEach(cellElement => {
-  gridElement?.prepend(cellElement);
-});
+// NEXT TURN:
+// create cellElements from data
+// checkWinner
+// set turn
+// clear board
+// draw board - kazanan varsa highligt edilecek.
+
+// event listener tetiklenince, markCell çalışacak ve başarılıysa bu durum o zaman event'in id'sine göre data'yı güncelleyecek ve nextTurn tetiklenecek. 

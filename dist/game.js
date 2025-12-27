@@ -35,14 +35,7 @@ const checkWinner = (board) => {
     }
     return Status.Ongoing;
 };
-const board = [
-    Player.X, null, null,
-    null, null, Player.O,
-    null, null, null
-];
-let status = Status.Ongoing;
-let currentPlayer = Player.X;
-const gameState = { board, status, currentPlayer };
+const appElement = document.querySelector(".app");
 const gridElement = document.querySelector(".app .grid");
 const createCellElement = (id, isOMarked, isXMarked, isHighlighted) => {
     const element = document.createElement("div");
@@ -56,23 +49,86 @@ const createCellElement = (id, isOMarked, isXMarked, isHighlighted) => {
     }
     if (isXMarked) {
         element.classList.add("x-marked");
+        console.log("Elementi yarattım, x-marked'ı verdim.");
     }
     if (isHighlighted) {
         element.classList.add("highlighted");
     }
     return element;
 };
-const cellElements = board.map((cell, index) => {
-    if (cell === Player.X) {
-        return createCellElement(index, false, true, false);
+const createCellElements = (gameState, previousCellElements) => {
+    const cellElements = gameState.board.map((cell, index) => {
+        let cellElement;
+        if (cell === Player.X) {
+            console.log("x'i gördüm, elementi yaratıyorum");
+            cellElement = createCellElement(index, false, true, false);
+        }
+        else if (cell === Player.O) {
+            cellElement = createCellElement(index, true, false, false);
+        }
+        else {
+            cellElement = createCellElement(index, false, false, false);
+        }
+        cellElement.addEventListener("click", (event) => {
+            const targetElement = event.target;
+            let targetElementId = parseInt(targetElement.dataset.cellId);
+            const newGameState = markCell(gameState, targetElementId, previousCellElements);
+        });
+        return cellElement;
+    });
+    previousCellElements = cellElements;
+    return cellElements;
+};
+const drawBoard = (cellElements) => {
+    const reversedElements = cellElements.reverse();
+    reversedElements.forEach(cellElement => {
+        gridElement === null || gridElement === void 0 ? void 0 : gridElement.prepend(cellElement);
+    });
+};
+const clearBoard = (cellElements) => {
+    console.log(cellElements);
+    cellElements.forEach(cellElement => {
+        cellElement.remove();
+    });
+};
+const markCell = (gameState, id, previousCellElements) => {
+    if (gameState.board[id] === null) {
+        gameState.board[id] = gameState.currentPlayer;
+        gameState.currentPlayer = gameState.currentPlayer === Player.X ? Player.O : Player.X;
     }
-    if (cell === Player.O) {
-        return createCellElement(index, true, false, false);
+    console.log(gameState);
+    nextTurn(gameState, previousCellElements);
+};
+const setTurn = (whoseTurn) => {
+    if (whoseTurn === Player.X) {
+        appElement === null || appElement === void 0 ? void 0 : appElement.classList.remove("o-turn");
+        appElement === null || appElement === void 0 ? void 0 : appElement.classList.add("x-turn");
     }
-    return createCellElement(index, false, false, false);
-});
-cellElements.forEach(cellElement => {
-    gridElement === null || gridElement === void 0 ? void 0 : gridElement.prepend(cellElement);
-});
+    else {
+        appElement === null || appElement === void 0 ? void 0 : appElement.classList.remove("x-turn");
+        appElement === null || appElement === void 0 ? void 0 : appElement.classList.add("o-turn");
+    }
+};
+const nextTurn = (gameState, previousCellElements) => {
+    const cellElements = createCellElements(gameState, previousCellElements);
+    if (previousCellElements.length > 0) {
+        clearBoard(previousCellElements);
+    }
+    drawBoard(cellElements);
+    setTurn(gameState.currentPlayer);
+};
+const startGame = () => {
+    const gameState = {
+        board: [
+            null, null, null,
+            null, null, null,
+            null, null, null
+        ],
+        status: Status.Ongoing,
+        currentPlayer: Player.X
+    };
+    nextTurn(gameState, []);
+};
+startGame();
 export {};
 //# sourceMappingURL=game.js.map
