@@ -108,6 +108,14 @@ const setTurn = (whoseTurn) => {
         appElement === null || appElement === void 0 ? void 0 : appElement.classList.add("o-turn");
     }
 };
+const xScoreElement = document.querySelector(".x-wins .count");
+const oScoreElement = document.querySelector(".o-wins .count");
+const tieScoreElement = document.querySelector(".ties .count");
+const setScore = (gameState) => {
+    xScoreElement.innerHTML = gameState.xScore.toString();
+    oScoreElement.innerHTML = gameState.oScore.toString();
+    tieScoreElement.innerHTML = gameState.tieScore.toString();
+};
 const nextRound = (gameState) => {
     gameState.board = [
         null, null, null,
@@ -115,21 +123,22 @@ const nextRound = (gameState) => {
         null, null, null
     ];
     if (gameState.status === Status.XWins) {
-        gameState.XScore++;
+        gameState.xScore++;
     }
     else if (gameState.status === Status.OWins) {
-        gameState.OScore++;
+        gameState.oScore++;
     }
     else if (gameState.status === Status.Tie) {
-        gameState.TieScore++;
+        gameState.tieScore++;
     }
     gameState.status = Status.Ongoing;
-    if ((gameState.XScore + gameState.OScore + gameState.TieScore) % 2 === 0) {
+    if ((gameState.xScore + gameState.oScore + gameState.tieScore) % 2 === 0) {
         gameState.currentPlayer = Player.X;
     }
     else {
         gameState.currentPlayer = Player.O;
     }
+    setScore(gameState);
 };
 const nextTurn = (gameState, previousCellElements) => {
     const winnerPattern = checkWinner(gameState);
@@ -140,7 +149,6 @@ const nextTurn = (gameState, previousCellElements) => {
     drawBoard(cellElements);
     setTurn(gameState.currentPlayer);
     if (gameState.status !== Status.Ongoing) {
-        setTimeout(() => alert("Next Round"), 0);
         nextRound(gameState);
         nextTurn(gameState, cellElements);
     }
@@ -154,10 +162,11 @@ const startGame = () => {
         ],
         status: Status.Ongoing,
         currentPlayer: Player.X,
-        XScore: 0,
-        OScore: 0,
-        TieScore: 0,
+        xScore: 0,
+        oScore: 0,
+        tieScore: 0,
     };
+    setScore(gameState);
     nextTurn(gameState, []);
 };
 startGame();

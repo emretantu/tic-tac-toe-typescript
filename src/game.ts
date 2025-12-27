@@ -19,9 +19,9 @@ type GameState = {
   board: Board,
   status: Status,
   currentPlayer: Player,
-  XScore: number,
-  OScore: number,
-  TieScore: number
+  xScore: number,
+  oScore: number,
+  tieScore: number
 }
 
 // const makeMove = (
@@ -153,6 +153,15 @@ const setTurn = (whoseTurn: Player): void => {
   }
 }
 
+const xScoreElement = document.querySelector<HTMLElement>(".x-wins .count");
+const oScoreElement = document.querySelector<HTMLElement>(".o-wins .count");
+const tieScoreElement = document.querySelector<HTMLElement>(".ties .count");
+const setScore = (gameState: GameState) => {
+  xScoreElement!.innerHTML = gameState.xScore.toString();
+  oScoreElement!.innerHTML = gameState.oScore.toString();
+  tieScoreElement!.innerHTML = gameState.tieScore.toString();
+}
+
 const nextRound = (gameState: GameState): void => {
   gameState.board = [
     null, null, null,
@@ -160,18 +169,19 @@ const nextRound = (gameState: GameState): void => {
     null, null, null
   ];
   if (gameState.status === Status.XWins) {
-    gameState.XScore++;
+    gameState.xScore++;
   } else if (gameState.status === Status.OWins) {
-    gameState.OScore++;
+    gameState.oScore++;
   } else if (gameState.status === Status.Tie) {
-    gameState.TieScore++;
+    gameState.tieScore++;
   }
   gameState.status = Status.Ongoing;
-  if ((gameState.XScore + gameState.OScore + gameState.TieScore) % 2 === 0) {
+  if ((gameState.xScore + gameState.oScore + gameState.tieScore) % 2 === 0) {
     gameState.currentPlayer = Player.X;
   } else {
     gameState.currentPlayer = Player.O;
   }
+  setScore(gameState);
 }
 
 const nextTurn = (
@@ -201,10 +211,11 @@ const startGame = (): void => {
     ],
     status: Status.Ongoing,
     currentPlayer: Player.X,
-    XScore: 0,
-    OScore: 0,
-    TieScore: 0,
+    xScore: 0,
+    oScore: 0,
+    tieScore: 0,
   }
+  setScore(gameState);
   nextTurn(gameState, []);
 }
 
