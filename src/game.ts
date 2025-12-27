@@ -32,7 +32,7 @@ const makeMove = (
 
 const checkWinner = (
   board: Board
-): Status  => {
+): { status: Status, winnerPattern: [Coordinates, Coordinates, Coordinates] | null} => {
   const winnerPatterns: [Coordinates, Coordinates, Coordinates][] = [
     [0, 1, 2], [3, 4, 5], [6, 7, 8], // Horizontal
     [0, 3, 6], [1, 4, 7], [2, 5, 8], // Vertical
@@ -40,13 +40,14 @@ const checkWinner = (
   ]
   for (const [first, second, third] of winnerPatterns) {
     if (board[first] && (board[first] === board[second]) && (board[first] === board[third])) {
-      return board[first] as unknown as Status;
+      const status = board[first] as unknown as Status;
+      return { status, winnerPattern: [first, second, third] }
     }
   }
   if (!board.includes(null)) {
-    return Status.Tie;
+    return { status: Status.Tie, winnerPattern: null };
   }
-  return Status.Ongoing;
+  return { status: Status.Ongoing, winnerPattern: null };
 };
 
 // UI/UX
@@ -78,16 +79,24 @@ const createCellElement = (
   return element;
 }
 
-const createCellElements = (gameState: GameState, previousCellElements: HTMLElement[]): HTMLElement[] => {
+const createCellElements = (
+  gameState: GameState,
+  previousCellElements: HTMLElement[],
+  winnerPatterns: [Coordinates, Coordinates, Coordinates] | null
+): HTMLElement[] => {
   const cellElements = gameState.board.map((cell, index) => {
+    let isHighlighted: boolean = false;
+    if (winnerPatterns) {
+      isHighlighted = winnerPatterns.includes(index as Coordinates);
+    }
     let cellElement;
     if (cell === Player.X) {
-      cellElement = createCellElement(index, false, true, false);
+      cellElement = createCellElement(index, false, true, isHighlighted);
     }
     else if (cell === Player.O) {
-      cellElement = createCellElement(index, true, false, false);
+      cellElement = createCellElement(index, true, false, isHighlighted);
     } else {
-      cellElement = createCellElement(index, false, false, false);
+      cellElement = createCellElement(index, false, false, isHighlighted);
     }
     cellElement.addEventListener("click", (event) => {
       const targetElement = event.target as HTMLElement;
@@ -114,11 +123,13 @@ const clearBoard = (cellElements: HTMLElement[]): void => {
 }
 
 const markCell = (gameState: GameState, id: number, previousCellElements: HTMLElement[]): void => {
+  if (gameState.status !== Status.Ongoing) {
+    return;
+  }
   if (gameState.board[id] === null) {
     gameState.board[id] = gameState.currentPlayer;
     gameState.currentPlayer = gameState.currentPlayer === Player.X ? Player.O : Player.X;
   }
-  console.log(gameState);
   nextTurn(gameState, previousCellElements);
 }
 
@@ -136,7 +147,9 @@ const nextTurn = (
   gameState: GameState,
   previousCellElements: HTMLElement[]
 ): void => {
-  const cellElements = createCellElements(gameState, previousCellElements);
+  const { status, winnerPattern } = checkWinner(gameState.board);
+  gameState.status = status; // !!!
+  const cellElements = createCellElements(gameState, previousCellElements, winnerPattern);
   if (previousCellElements.length > 0) {
     clearBoard(previousCellElements);
   }
@@ -158,13 +171,3 @@ const startGame = (): void => {
 }
 
 startGame();
-
-
-// NEXT TURN:
-// create cellElements from data
-// checkWinner
-// set turn
-// clear board
-// draw board - kazanan varsa highligt edilecek.
-
-// event listener tetiklenince, markCell çalışacak ve başarılıysa bu durum o zaman event'in id'sine göre data'yı güncelleyecek ve nextTurn tetiklenecek. 

@@ -27,13 +27,14 @@ const checkWinner = (board) => {
     ];
     for (const [first, second, third] of winnerPatterns) {
         if (board[first] && (board[first] === board[second]) && (board[first] === board[third])) {
-            return board[first];
+            const status = board[first];
+            return { status, winnerPattern: [first, second, third] };
         }
     }
     if (!board.includes(null)) {
-        return Status.Tie;
+        return { status: Status.Tie, winnerPattern: null };
     }
-    return Status.Ongoing;
+    return { status: Status.Ongoing, winnerPattern: null };
 };
 const appElement = document.querySelector(".app");
 const gridElement = document.querySelector(".app .grid");
@@ -49,25 +50,27 @@ const createCellElement = (id, isOMarked, isXMarked, isHighlighted) => {
     }
     if (isXMarked) {
         element.classList.add("x-marked");
-        console.log("Elementi yarattım, x-marked'ı verdim.");
     }
     if (isHighlighted) {
         element.classList.add("highlighted");
     }
     return element;
 };
-const createCellElements = (gameState, previousCellElements) => {
+const createCellElements = (gameState, previousCellElements, winnerPatterns) => {
     const cellElements = gameState.board.map((cell, index) => {
+        let isHighlighted = false;
+        if (winnerPatterns) {
+            isHighlighted = winnerPatterns.includes(index);
+        }
         let cellElement;
         if (cell === Player.X) {
-            console.log("x'i gördüm, elementi yaratıyorum");
-            cellElement = createCellElement(index, false, true, false);
+            cellElement = createCellElement(index, false, true, isHighlighted);
         }
         else if (cell === Player.O) {
-            cellElement = createCellElement(index, true, false, false);
+            cellElement = createCellElement(index, true, false, isHighlighted);
         }
         else {
-            cellElement = createCellElement(index, false, false, false);
+            cellElement = createCellElement(index, false, false, isHighlighted);
         }
         cellElement.addEventListener("click", (event) => {
             const targetElement = event.target;
@@ -86,17 +89,18 @@ const drawBoard = (cellElements) => {
     });
 };
 const clearBoard = (cellElements) => {
-    console.log(cellElements);
     cellElements.forEach(cellElement => {
         cellElement.remove();
     });
 };
 const markCell = (gameState, id, previousCellElements) => {
+    if (gameState.status !== Status.Ongoing) {
+        return;
+    }
     if (gameState.board[id] === null) {
         gameState.board[id] = gameState.currentPlayer;
         gameState.currentPlayer = gameState.currentPlayer === Player.X ? Player.O : Player.X;
     }
-    console.log(gameState);
     nextTurn(gameState, previousCellElements);
 };
 const setTurn = (whoseTurn) => {
@@ -110,7 +114,9 @@ const setTurn = (whoseTurn) => {
     }
 };
 const nextTurn = (gameState, previousCellElements) => {
-    const cellElements = createCellElements(gameState, previousCellElements);
+    const { status, winnerPattern } = checkWinner(gameState.board);
+    gameState.status = status;
+    const cellElements = createCellElements(gameState, previousCellElements, winnerPattern);
     if (previousCellElements.length > 0) {
         clearBoard(previousCellElements);
     }
