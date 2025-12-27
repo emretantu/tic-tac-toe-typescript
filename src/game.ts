@@ -65,6 +65,45 @@ const checkWinner = (
 const modal = document.querySelector<HTMLDialogElement>("dialog");
 modal!.showModal();
 
+const createModalContent = (
+  sub: string,
+  message: string,
+  button2Text: string,
+  button1Text: string,
+  button2Callback: Function,
+  button1Callback: Function,
+  status: "notr" | "x-takes" | "o-takes"
+): HTMLElement => {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'modal-content';
+
+  wrapper.innerHTML = `
+    <div class="message ${status === "notr" ? "" : status}">
+      ${sub ? '<p class="sub">${sub}</p>' : ""}
+      <div class="main">
+        <div class="img"></div>
+        <p class="message-text">${message}</p>
+      </div>
+    </div>
+      <div class="buttons">
+      <button class="secondary-button-2">${button2Text}</button>
+      <button class="secondary-button-1">${button1Text}</button>
+    </div>
+  `;
+
+  const btn1 = wrapper.querySelector('.secondary-button-1') as HTMLButtonElement;
+  const btn2 = wrapper.querySelector('.secondary-button-2') as HTMLButtonElement;
+
+  btn1.addEventListener('click', () => button1Callback());
+  btn2.addEventListener('click', () => button2Callback());
+
+  return wrapper;
+}
+
+const openModal = (modalContent: HTMLElement, modal: HTMLElement) => {
+  modal?.replaceChildren(modalContent);
+}
+
 const appElement = document.querySelector<HTMLElement>(".app");
 const gridElement = document.querySelector<HTMLElement>(".app .grid");
 

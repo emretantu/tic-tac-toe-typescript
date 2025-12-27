@@ -394,7 +394,7 @@ dialog::backdrop {
   background-color: hsla(0, 0%, 0%, 0.6);
 }
 
-.model-content {
+.modal-content {
   padding: 3rem;
   display: flex;
   flex-direction: column;
@@ -402,20 +402,20 @@ dialog::backdrop {
   gap: 1.5rem;
 }
 
-.model-content .message {
+.modal-content .message {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
 }
 
-.model-content .message .sub {
+.modal-content .message .sub {
   text-align: center;
   color: hsl(var(--clr-silver400));
   font-size: 0.875rem;
   letter-spacing: 0.06em;
 }
 
-.model-content .message .main {
+.modal-content .message .main {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -423,10 +423,11 @@ dialog::backdrop {
   color: hsl(var(--clr-silver400)); /* Default */
   font-size: 1.5rem;
   letter-spacing: 0.06em;
+  text-align: center;
 }
 
-.model-content .message.x-takes .main .img,
-.model-content .message.o-takes .main .img {
+.modal-content .message.x-takes .main .img,
+.modal-content .message.o-takes .main .img {
   --size: 1.875rem;
   background-repeat: no-repeat;
   background-position: center;
@@ -435,24 +436,24 @@ dialog::backdrop {
   height: var(--size);
 }
 
-.model-content .buttons {
+.modal-content .buttons {
   display: flex;
   align-items: center;
   gap: 1rem;
 }
 
-.model-content .message.x-takes .main {
+.modal-content .message.x-takes .main {
   color: hsl(var(--clr-blue400));
 }
 
-.model-content .message.x-takes .main .img {
+.modal-content .message.x-takes .main .img {
   background-image: url(./assets/icon-x.svg);
 }
 
-.model-content .message.o-takes .main {
+.modal-content .message.o-takes .main {
   color: hsl(var(--clr-orange400));
 }
 
-.model-content .message.o-takes .main .img {
+.modal-content .message.o-takes .main .img {
   background-image: url(./assets/icon-o.svg);
 }

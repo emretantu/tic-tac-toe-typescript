@@ -33,6 +33,31 @@ const checkWinner = (gameState) => {
 };
 const modal = document.querySelector("dialog");
 modal.showModal();
+const createModalContent = (sub, message, button2Text, button1Text, button2Callback, button1Callback, status) => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'modal-content';
+    wrapper.innerHTML = `
+    <div class="message ${status === "notr" ? "" : status}">
+      ${sub ? '<p class="sub">${sub}</p>' : ""}
+      <div class="main">
+        <div class="img"></div>
+        <p class="message-text">${message}</p>
+      </div>
+    </div>
+      <div class="buttons">
+      <button class="secondary-button-2">${button2Text}</button>
+      <button class="secondary-button-1">${button1Text}</button>
+    </div>
+  `;
+    const btn1 = wrapper.querySelector('.secondary-button-1');
+    const btn2 = wrapper.querySelector('.secondary-button-2');
+    btn1.addEventListener('click', () => button1Callback());
+    btn2.addEventListener('click', () => button2Callback());
+    return wrapper;
+};
+const openModal = (modalContent, modal) => {
+    modal === null || modal === void 0 ? void 0 : modal.replaceChildren(modalContent);
+};
 const appElement = document.querySelector(".app");
 const gridElement = document.querySelector(".app .grid");
 const createCellElement = (id, isOMarked, isXMarked, isHighlighted) => {
