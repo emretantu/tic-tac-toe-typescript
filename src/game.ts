@@ -15,39 +15,49 @@ enum Status {
   Tie = "TIE",
   Ongoing = "ONGOING"
 } 
-type GameState = { board: Board, status: Status, currentPlayer: Player }
-
-const makeMove = (
+type GameState = {
   board: Board,
-  player: Player,
-  coordinate: Coordinates
-): Board => {
-  if (board[coordinate] !== null) {
-    return board; // same object/reference
-  }
-  const nextBoard: Board = [...board];
-  nextBoard[coordinate] = player;
-  return nextBoard;
-};
+  status: Status,
+  currentPlayer: Player,
+  XScore: number,
+  OScore: number,
+  TieScore: number
+}
+
+// const makeMove = (
+//   board: Board,
+//   player: Player,
+//   coordinate: Coordinates
+// ): Board => {
+//   if (board[coordinate] !== null) {
+//     return board; // same object/reference
+//   }
+//   const nextBoard: Board = [...board];
+//   nextBoard[coordinate] = player;
+//   return nextBoard;
+// };
 
 const checkWinner = (
-  board: Board
-): { status: Status, winnerPattern: [Coordinates, Coordinates, Coordinates] | null} => {
+  gameState: GameState
+): [Coordinates, Coordinates, Coordinates] | null => {
   const winnerPatterns: [Coordinates, Coordinates, Coordinates][] = [
     [0, 1, 2], [3, 4, 5], [6, 7, 8], // Horizontal
     [0, 3, 6], [1, 4, 7], [2, 5, 8], // Vertical
     [0, 4, 8], [2, 4, 6] // Diagonal
   ]
   for (const [first, second, third] of winnerPatterns) {
-    if (board[first] && (board[first] === board[second]) && (board[first] === board[third])) {
-      const status = board[first] as unknown as Status;
-      return { status, winnerPattern: [first, second, third] }
+    if (gameState.board[first] && (gameState.board[first] === gameState.board[second]) && (gameState.board[first] === gameState.board[third])) {
+      const status = gameState.board[first] as unknown as Status;
+      gameState.status = status;
+      return [first, second, third]
     }
   }
-  if (!board.includes(null)) {
-    return { status: Status.Tie, winnerPattern: null };
+  if (!gameState.board.includes(null)) {
+    gameState.status = Status.Tie;
+    return null;
   }
-  return { status: Status.Ongoing, winnerPattern: null };
+  gameState.status = Status.Ongoing;
+  return null;
 };
 
 // UI/UX
@@ -101,8 +111,8 @@ const createCellElements = (
     cellElement.addEventListener("click", (event) => {
       const targetElement = event.target as HTMLElement;
       let targetElementId: number = parseInt(targetElement.dataset.cellId as string);
-      const newGameState = markCell(gameState, targetElementId, previousCellElements);
-    })
+      markCell(gameState, targetElementId, previousCellElements);
+    });
     return cellElement;
   });
   previousCellElements = cellElements;
@@ -143,18 +153,43 @@ const setTurn = (whoseTurn: Player): void => {
   }
 }
 
+const nextRound = (gameState: GameState): void => {
+  gameState.board = [
+    null, null, null,
+    null, null, null,
+    null, null, null
+  ];
+  if (gameState.status === Status.XWins) {
+    gameState.XScore++;
+  } else if (gameState.status === Status.OWins) {
+    gameState.OScore++;
+  } else if (gameState.status === Status.Tie) {
+    gameState.TieScore++;
+  }
+  gameState.status = Status.Ongoing;
+  if ((gameState.XScore + gameState.OScore + gameState.TieScore) % 2 === 0) {
+    gameState.currentPlayer = Player.X;
+  } else {
+    gameState.currentPlayer = Player.O;
+  }
+}
+
 const nextTurn = (
   gameState: GameState,
   previousCellElements: HTMLElement[]
 ): void => {
-  const { status, winnerPattern } = checkWinner(gameState.board);
-  gameState.status = status; // !!!
-  const cellElements = createCellElements(gameState, previousCellElements, winnerPattern);
+  const winnerPattern = checkWinner(gameState);
   if (previousCellElements.length > 0) {
     clearBoard(previousCellElements);
   }
+  const cellElements = createCellElements(gameState, previousCellElements, winnerPattern);
   drawBoard(cellElements);
   setTurn(gameState.currentPlayer);
+  
+  if (gameState.status !== Status.Ongoing) {
+    nextRound(gameState);
+    nextTurn(gameState, cellElements);
+  }
 }
 
 const startGame = (): void => {
@@ -165,7 +200,10 @@ const startGame = (): void => {
       null, null, null
     ],
     status: Status.Ongoing,
-    currentPlayer: Player.X
+    currentPlayer: Player.X,
+    XScore: 0,
+    OScore: 0,
+    TieScore: 0,
   }
   nextTurn(gameState, []);
 }

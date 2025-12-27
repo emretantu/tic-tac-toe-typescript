@@ -11,30 +11,25 @@ var Status;
     Status["Tie"] = "TIE";
     Status["Ongoing"] = "ONGOING";
 })(Status || (Status = {}));
-const makeMove = (board, player, coordinate) => {
-    if (board[coordinate] !== null) {
-        return board;
-    }
-    const nextBoard = [...board];
-    nextBoard[coordinate] = player;
-    return nextBoard;
-};
-const checkWinner = (board) => {
+const checkWinner = (gameState) => {
     const winnerPatterns = [
         [0, 1, 2], [3, 4, 5], [6, 7, 8],
         [0, 3, 6], [1, 4, 7], [2, 5, 8],
         [0, 4, 8], [2, 4, 6]
     ];
     for (const [first, second, third] of winnerPatterns) {
-        if (board[first] && (board[first] === board[second]) && (board[first] === board[third])) {
-            const status = board[first];
-            return { status, winnerPattern: [first, second, third] };
+        if (gameState.board[first] && (gameState.board[first] === gameState.board[second]) && (gameState.board[first] === gameState.board[third])) {
+            const status = gameState.board[first];
+            gameState.status = status;
+            return [first, second, third];
         }
     }
-    if (!board.includes(null)) {
-        return { status: Status.Tie, winnerPattern: null };
+    if (!gameState.board.includes(null)) {
+        gameState.status = Status.Tie;
+        return null;
     }
-    return { status: Status.Ongoing, winnerPattern: null };
+    gameState.status = Status.Ongoing;
+    return null;
 };
 const appElement = document.querySelector(".app");
 const gridElement = document.querySelector(".app .grid");
@@ -75,7 +70,7 @@ const createCellElements = (gameState, previousCellElements, winnerPatterns) => 
         cellElement.addEventListener("click", (event) => {
             const targetElement = event.target;
             let targetElementId = parseInt(targetElement.dataset.cellId);
-            const newGameState = markCell(gameState, targetElementId, previousCellElements);
+            markCell(gameState, targetElementId, previousCellElements);
         });
         return cellElement;
     });
@@ -113,15 +108,42 @@ const setTurn = (whoseTurn) => {
         appElement === null || appElement === void 0 ? void 0 : appElement.classList.add("o-turn");
     }
 };
+const nextRound = (gameState) => {
+    gameState.board = [
+        null, null, null,
+        null, null, null,
+        null, null, null
+    ];
+    if (gameState.status === Status.XWins) {
+        gameState.XScore++;
+    }
+    else if (gameState.status === Status.OWins) {
+        gameState.OScore++;
+    }
+    else if (gameState.status === Status.Tie) {
+        gameState.TieScore++;
+    }
+    gameState.status = Status.Ongoing;
+    if ((gameState.XScore + gameState.OScore + gameState.TieScore) % 2 === 0) {
+        gameState.currentPlayer = Player.X;
+    }
+    else {
+        gameState.currentPlayer = Player.O;
+    }
+};
 const nextTurn = (gameState, previousCellElements) => {
-    const { status, winnerPattern } = checkWinner(gameState.board);
-    gameState.status = status;
-    const cellElements = createCellElements(gameState, previousCellElements, winnerPattern);
+    const winnerPattern = checkWinner(gameState);
     if (previousCellElements.length > 0) {
         clearBoard(previousCellElements);
     }
+    const cellElements = createCellElements(gameState, previousCellElements, winnerPattern);
     drawBoard(cellElements);
     setTurn(gameState.currentPlayer);
+    if (gameState.status !== Status.Ongoing) {
+        setTimeout(() => alert("Next Round"), 0);
+        nextRound(gameState);
+        nextTurn(gameState, cellElements);
+    }
 };
 const startGame = () => {
     const gameState = {
@@ -131,7 +153,10 @@ const startGame = () => {
             null, null, null
         ],
         status: Status.Ongoing,
-        currentPlayer: Player.X
+        currentPlayer: Player.X,
+        XScore: 0,
+        OScore: 0,
+        TieScore: 0,
     };
     nextTurn(gameState, []);
 };
