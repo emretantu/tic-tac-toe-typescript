@@ -136,6 +136,25 @@ const difficultySelectionElement = document.querySelector<HTMLInputElement>(".st
 const multiplayerButtonElement = document.querySelector<HTMLElement>(".start .multiplayer");
 
 
+const handleBeforeUnload = (event: Event) => {
+  const hasUnsavedChanges = true; 
+
+  if (hasUnsavedChanges) {
+    event.preventDefault();
+    return "";
+  }
+};
+
+let interruptEventListener;
+
+const interruptClosing = (): void => {
+  interruptEventListener = window.addEventListener("beforeunload", handleBeforeUnload)
+}
+
+const allowClosing = (): void => {
+  window.removeEventListener("beforeunload", handleBeforeUnload);
+};
+
 restartButtonElement?.addEventListener("click", () => {
   openModal(
     createModalContent(
@@ -158,6 +177,7 @@ restartButtonElement?.addEventListener("click", () => {
 const openStartScreen = () => {
   appElement?.classList.add("hide")
   startElement?.classList.remove("hide");
+  allowClosing();
 }
 
 xSelectionElement?.addEventListener("click", () => {
@@ -535,6 +555,7 @@ const startGame = (multiplayer: boolean, player1: Player, difficulty?: Difficult
   setPlayerName(gameState);
   setScore(gameState);
   nextTurn(gameState);
+  interruptClosing();
 }
 
 openStartScreen();

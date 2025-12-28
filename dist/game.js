@@ -81,6 +81,20 @@ const oSelectionElement = document.querySelector(".start .o-selection");
 const humanVsCpuButtonElement = document.querySelector(".start .human-vs-cpu");
 const difficultySelectionElement = document.querySelector(".start .difficulty-selection");
 const multiplayerButtonElement = document.querySelector(".start .multiplayer");
+const handleBeforeUnload = (event) => {
+    const hasUnsavedChanges = true;
+    if (hasUnsavedChanges) {
+        event.preventDefault();
+        return "";
+    }
+};
+let interruptEventListener;
+const interruptClosing = () => {
+    interruptEventListener = window.addEventListener("beforeunload", handleBeforeUnload);
+};
+const allowClosing = () => {
+    window.removeEventListener("beforeunload", handleBeforeUnload);
+};
 restartButtonElement === null || restartButtonElement === void 0 ? void 0 : restartButtonElement.addEventListener("click", () => {
     openModal(createModalContent("", "RESTART GAME?", "NO, CANCEL", "YES, RESTART", () => closeModal(modal), () => {
         openStartScreen();
@@ -90,6 +104,7 @@ restartButtonElement === null || restartButtonElement === void 0 ? void 0 : rest
 const openStartScreen = () => {
     appElement === null || appElement === void 0 ? void 0 : appElement.classList.add("hide");
     startElement === null || startElement === void 0 ? void 0 : startElement.classList.remove("hide");
+    allowClosing();
 };
 xSelectionElement === null || xSelectionElement === void 0 ? void 0 : xSelectionElement.addEventListener("click", () => {
     oSelectionElement === null || oSelectionElement === void 0 ? void 0 : oSelectionElement.classList.remove("selected");
@@ -424,6 +439,7 @@ const startGame = (multiplayer, player1, difficulty) => {
     setPlayerName(gameState);
     setScore(gameState);
     nextTurn(gameState);
+    interruptClosing();
 };
 openStartScreen();
 export {};
