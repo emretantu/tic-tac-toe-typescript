@@ -66,6 +66,32 @@ const openModal = (modalContent, modal) => {
 };
 const appElement = document.querySelector(".app");
 const gridElement = document.querySelector(".app .grid");
+const startElement = document.querySelector(".start");
+const xSelectionElement = document.querySelector(".start .x-selection");
+const oSelectionElement = document.querySelector(".start .o-selection");
+const humanVsCpuButtonElement = document.querySelector(".start .human-vs-cpu");
+const multiplayerButtonElement = document.querySelector(".start .multiplayer");
+const openStartScreen = () => {
+    appElement === null || appElement === void 0 ? void 0 : appElement.classList.add("hide");
+    startElement === null || startElement === void 0 ? void 0 : startElement.classList.remove("hide");
+};
+xSelectionElement === null || xSelectionElement === void 0 ? void 0 : xSelectionElement.addEventListener("click", () => {
+    oSelectionElement === null || oSelectionElement === void 0 ? void 0 : oSelectionElement.classList.remove("selected");
+    xSelectionElement.classList.add("selected");
+});
+oSelectionElement === null || oSelectionElement === void 0 ? void 0 : oSelectionElement.addEventListener("click", () => {
+    xSelectionElement === null || xSelectionElement === void 0 ? void 0 : xSelectionElement.classList.remove("selected");
+    oSelectionElement.classList.add("selected");
+});
+const getPlayer = () => {
+    return (xSelectionElement === null || xSelectionElement === void 0 ? void 0 : xSelectionElement.classList.contains("selected")) ? Player.X : Player.O;
+};
+humanVsCpuButtonElement === null || humanVsCpuButtonElement === void 0 ? void 0 : humanVsCpuButtonElement.addEventListener("click", () => {
+    startGame(false, getPlayer());
+});
+multiplayerButtonElement === null || multiplayerButtonElement === void 0 ? void 0 : multiplayerButtonElement.addEventListener("click", () => {
+    startGame(true, getPlayer());
+});
 const createCellElement = (id, isOMarked, isXMarked, isHighlighted) => {
     const element = document.createElement("div");
     element.dataset.cellId = id.toString();
@@ -241,7 +267,7 @@ const nextTurn = (gameState) => {
         cellElements = createCellElements(gameState, winnerPattern, humanTurn);
         drawBoard(cellElements);
         if (!humanTurn) {
-            setTimeout(() => makeCpuMove(gameState), 300);
+            setTimeout(() => makeCpuMove(gameState), 500);
         }
     }
     setTurn(gameState.currentPlayer);
@@ -250,6 +276,8 @@ const nextTurn = (gameState) => {
     }
 };
 const startGame = (multiplayer, player1) => {
+    startElement === null || startElement === void 0 ? void 0 : startElement.classList.add("hide");
+    appElement === null || appElement === void 0 ? void 0 : appElement.classList.remove("hide");
     let xPlayer = "";
     let oPlayer = "";
     if (multiplayer) {
@@ -280,6 +308,6 @@ const startGame = (multiplayer, player1) => {
     setScore(gameState);
     nextTurn(gameState);
 };
-startGame(false, Player.X);
+openStartScreen();
 export {};
 //# sourceMappingURL=game.js.map

@@ -131,6 +131,39 @@ const openModal = (modalContent: HTMLElement, modal: HTMLDialogElement) => {
 
 const appElement = document.querySelector<HTMLElement>(".app");
 const gridElement = document.querySelector<HTMLElement>(".app .grid");
+const startElement = document.querySelector<HTMLElement>(".start");
+const xSelectionElement = document.querySelector<HTMLElement>(".start .x-selection");
+const oSelectionElement = document.querySelector<HTMLElement>(".start .o-selection");
+const humanVsCpuButtonElement = document.querySelector<HTMLElement>(".start .human-vs-cpu");
+const multiplayerButtonElement = document.querySelector<HTMLElement>(".start .multiplayer");
+
+
+const openStartScreen = () => {
+  appElement?.classList.add("hide")
+  startElement?.classList.remove("hide");
+}
+
+xSelectionElement?.addEventListener("click", () => {
+  oSelectionElement?.classList.remove("selected");
+  xSelectionElement.classList.add("selected");
+});
+
+oSelectionElement?.addEventListener("click", () => {
+  xSelectionElement?.classList.remove("selected");
+  oSelectionElement.classList.add("selected");
+});
+
+const getPlayer = (): Player => {
+  return xSelectionElement?.classList.contains("selected") ? Player.X : Player.O;
+}
+
+humanVsCpuButtonElement?.addEventListener("click", () => {
+    startGame(false, getPlayer());
+});
+
+multiplayerButtonElement?.addEventListener("click", () => {
+    startGame(true, getPlayer());
+});
 
 const createCellElement = (
   id: number,
@@ -338,7 +371,7 @@ const nextTurn = (
     cellElements = createCellElements(gameState, winnerPattern, humanTurn);
     drawBoard(cellElements);
     if (!humanTurn) {
-      setTimeout(() => makeCpuMove(gameState), 300);
+      setTimeout(() => makeCpuMove(gameState), 500);
     }
   }
 
@@ -350,6 +383,9 @@ const nextTurn = (
 }
 
 const startGame = (multiplayer: boolean, player1: Player): void => {
+  startElement?.classList.add("hide");
+  appElement?.classList.remove("hide");
+
   let xPlayer = "";
   let oPlayer = "";
   
@@ -382,4 +418,4 @@ const startGame = (multiplayer: boolean, player1: Player): void => {
   nextTurn(gameState);
 }
 
-startGame(false, Player.X);
+openStartScreen();
