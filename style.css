@@ -457,14 +457,6 @@ body {
   box-shadow: inset 0 -0.5rem hsl(var(--clr-blue500));
 }
 
-.app.o-turn:not(.ignore-hover) .cell:not(.o-marked):not(.x-marked):hover {
-  background-image: url(./assets/icon-o-outline.svg);
-}
-
-.app.x-turn:not(.ignore-hover) .cell:not(.o-marked):not(.x-marked):hover {
-  background-image: url(./assets/icon-x-outline.svg);
-}
-
 .x-wins, .ties, .o-wins {
   border-radius: 0.6rem;
   padding: 1rem 1.25rem;
@@ -643,6 +635,14 @@ dialog::backdrop {
     background-size: 4rem;
     padding: 2.375rem;
     padding-bottom: calc(2.375rem + 0.5rem);
+  }
+
+  .app.o-turn:not(.ignore-hover) .cell:not(.o-marked):not(.x-marked):hover {
+    background-image: url(./assets/icon-o-outline.svg);
+  }
+
+  .app.x-turn:not(.ignore-hover) .cell:not(.o-marked):not(.x-marked):hover {
+    background-image: url(./assets/icon-x-outline.svg);
   }
 
   .x-wins, .ties, .o-wins {
