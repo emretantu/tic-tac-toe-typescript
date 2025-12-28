@@ -115,18 +115,9 @@ const openModal = (modalContent: HTMLElement, modal: HTMLDialogElement) => {
   modal.showModal();
 }
 
-// openModal(
-//   createModalContent(
-//     "", 
-//     "TEST MESSAGE", 
-//     "kapat", 
-//     "sıradaki round", 
-//     () => modal?.close(), 
-//     () => console.log("Button 1 Clicked"), 
-//     "notr"
-//   ),
-//   modal as HTMLDialogElement
-// )
+const closeModal = (modal: HTMLDialogElement | null) => {
+  modal?.close();
+}
 
 
 const appElement = document.querySelector<HTMLElement>(".app");
@@ -290,10 +281,11 @@ const resolveRoundEnd = (gameState: GameState) => {
   const button2Callback = () => {
     nextRound(gameState);
     nextTurn(gameState);
-    modal?.close()
+    closeModal(modal);
   }
   const button1Callback = () => {
-    modal?.close()
+    openStartScreen();
+    closeModal(modal);
   }
   const button2Text = "QUIT";
   const button1Text = "NEXT ROUND";
@@ -371,7 +363,11 @@ const nextTurn = (
     cellElements = createCellElements(gameState, winnerPattern, humanTurn);
     drawBoard(cellElements);
     if (!humanTurn) {
-      setTimeout(() => makeCpuMove(gameState), 500);
+      appElement?.classList.add("ignore-hover"); // Ignore human's hover
+      setTimeout(() => {
+        makeCpuMove(gameState);
+        appElement?.classList.remove("ignore-hover");
+      }, 500);
     }
   }
 

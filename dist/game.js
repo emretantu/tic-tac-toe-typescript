@@ -64,6 +64,9 @@ const openModal = (modalContent, modal) => {
     modal === null || modal === void 0 ? void 0 : modal.replaceChildren(modalContent);
     modal.showModal();
 };
+const closeModal = (modal) => {
+    modal === null || modal === void 0 ? void 0 : modal.close();
+};
 const appElement = document.querySelector(".app");
 const gridElement = document.querySelector(".app .grid");
 const startElement = document.querySelector(".start");
@@ -201,10 +204,11 @@ const resolveRoundEnd = (gameState) => {
     const button2Callback = () => {
         nextRound(gameState);
         nextTurn(gameState);
-        modal === null || modal === void 0 ? void 0 : modal.close();
+        closeModal(modal);
     };
     const button1Callback = () => {
-        modal === null || modal === void 0 ? void 0 : modal.close();
+        openStartScreen();
+        closeModal(modal);
     };
     const button2Text = "QUIT";
     const button1Text = "NEXT ROUND";
@@ -267,7 +271,11 @@ const nextTurn = (gameState) => {
         cellElements = createCellElements(gameState, winnerPattern, humanTurn);
         drawBoard(cellElements);
         if (!humanTurn) {
-            setTimeout(() => makeCpuMove(gameState), 500);
+            appElement === null || appElement === void 0 ? void 0 : appElement.classList.add("ignore-hover");
+            setTimeout(() => {
+                makeCpuMove(gameState);
+                appElement === null || appElement === void 0 ? void 0 : appElement.classList.remove("ignore-hover");
+            }, 500);
         }
     }
     setTurn(gameState.currentPlayer);
