@@ -123,15 +123,17 @@ body {
 
 /* Common primary button properties */
 .button-1, .button-2 {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   outline: none;
   border: none;
   border-radius: 1rem;
-  padding: 1.5rem;
-  padding-bottom: calc(1.5rem + 0.5rem);
+  padding: 1.125rem;
+  padding-bottom: calc(1.125rem + 0.5rem);
   width: max-content;
 
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: var(--fw-bold);
   letter-spacing: 0.06em;
 
@@ -197,12 +199,110 @@ body {
 
 /* DESIGN */
 
+.hide {
+  display: none !important;
+}
+
+.start {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  gap: 2rem;
+}
+
+.start .logo {
+  display: flex;
+  justify-content: center;
+}
+
+.player-selection {
+  border-radius: 1rem;
+  padding: 2rem 1.5rem;
+  padding-bottom: calc(2rem + 0.5rem);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+
+  background-color: hsl(var(--clr-navy700));
+  box-shadow: inset 0 -0.5rem hsl(var(--clr-navy900));
+}
+
+.selection-heading {
+  font-size: 1rem;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.06em;
+}
+
+.selection-sub-heading {
+  font-size: 0.875rem;
+  font-weight: var(--fw-medium);
+  letter-spacing: 0.06em;
+}
+
+.selection {
+  border-radius: 0.6rem;
+  padding: 0.5rem;
+  width: 100%;
+  background-color: hsl(var(--clr-navy800));
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.selection img {
+  height: 2rem;
+  width: 2rem;
+}
+
+.selection > div {
+  border-radius: 0.6rem;
+  cursor: pointer;
+  padding: 0.75rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.selection > div:not(.selected):hover {
+  background-color: hsl(var(--clr-silver300) / 0.05);
+}
+
+.selection > .selected {
+  background-color: hsl(var(--clr-silver400));
+}
+
+.selection > .selected img.silver-icon {
+  display: none;
+}
+
+.selection > :not(.selected) img.navy-icon {
+  display: none;
+}
+
+.mode-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1rem;
+}
+
+.mode-buttons > * {
+  width: 100%;
+}
+
 .app-container {
   padding: 1.25rem;
   height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.app-container > * {
+  width: 20.5rem;
 }
 
 .app {
@@ -305,14 +405,10 @@ body {
   padding-bottom: calc(1.5rem + 0.5rem);
   aspect-ratio: 1;
 
-  font-size: 1.25rem;
-  font-weight: var(--fw-bold);
-  letter-spacing: 0.06em;
-
   cursor: pointer;
 
   background-color: hsl(var(--clr-navy700));
-  box-shadow: inset 0 -0.25rem hsl(var(--clr-navy900));
+  box-shadow: inset 0 -0.5rem hsl(var(--clr-navy900));
 
   background-repeat: no-repeat;
   background-position: center;
@@ -330,13 +426,13 @@ body {
 .cell.highlighted.o-marked {
   background-image: url(./assets/icon-o-navy.svg);
   background-color: hsl(var(--clr-orange400));
-  box-shadow: inset 0 -0.25rem hsl(var(--clr-orange500));
+  box-shadow: inset 0 -0.5rem hsl(var(--clr-orange500));
 }
 
 .cell.highlighted.x-marked {
   background-image: url(./assets/icon-x-navy.svg);
   background-color: hsl(var(--clr-blue400));
-  box-shadow: inset 0 -0.25rem hsl(var(--clr-blue500));
+  box-shadow: inset 0 -0.5rem hsl(var(--clr-blue500));
 }
 
 .app.o-turn .cell:not(.o-marked):not(.x-marked):hover {

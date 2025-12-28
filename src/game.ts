@@ -383,6 +383,3 @@ const startGame = (multiplayer: boolean, player1: Player): void => {
 }
 
 startGame(false, Player.X);
-
-// SON KİM BİTİYOR, İKİ DURUMDA DA PROBLEM ÇIKIYOR MU?
-// HUMAN VS CPU YAPINCA NEX TURN'DE PATLIYOR, KONTROL
