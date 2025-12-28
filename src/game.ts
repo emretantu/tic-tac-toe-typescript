@@ -14,7 +14,14 @@ enum Status {
   OWins = Player.O,
   Tie = "TIE",
   Ongoing = "ONGOING"
-} 
+}
+enum Difficulty {
+  Noob = 1,
+  Easy = 2,
+  Medium = 4,
+  Hard = 16,
+  Imposible = 0
+}
 type GameState = {
   board: Board,
   status: Status,
@@ -25,7 +32,8 @@ type GameState = {
   xPlayer: string,
   oPlayer: string,
   multiplayer: boolean,
-  humanPlayer: Player | undefined
+  humanPlayer: Player | undefined,
+  difficulty: Difficulty | undefined
 }
 
 // const makeMove = (
@@ -124,6 +132,7 @@ const startElement = document.querySelector<HTMLElement>(".start");
 const xSelectionElement = document.querySelector<HTMLElement>(".start .x-selection");
 const oSelectionElement = document.querySelector<HTMLElement>(".start .o-selection");
 const humanVsCpuButtonElement = document.querySelector<HTMLElement>(".start .human-vs-cpu");
+const difficultySelectionElement = document.querySelector<HTMLInputElement>(".start .difficulty-selection");
 const multiplayerButtonElement = document.querySelector<HTMLElement>(".start .multiplayer");
 
 
@@ -166,11 +175,19 @@ const getPlayer = (): Player => {
 }
 
 humanVsCpuButtonElement?.addEventListener("click", () => {
-    startGame(false, getPlayer());
+  let difficulty: Difficulty = Difficulty.Medium; // Default
+  switch(difficultySelectionElement?.value) {
+    case "noob": difficulty = Difficulty.Noob; break;
+    case "easy": difficulty = Difficulty.Easy; break;
+    case "medium": difficulty = Difficulty.Medium; break;
+    case "hard": difficulty = Difficulty.Hard; break;
+    case "impossible": difficulty = Difficulty.Imposible; break;
+  }
+  startGame(false, getPlayer(), difficulty);
 });
 
 multiplayerButtonElement?.addEventListener("click", () => {
-    startGame(true, getPlayer());
+  startGame(true, getPlayer());
 });
 
 const createCellElement = (
@@ -268,14 +285,9 @@ const evaluateBoard = (board: Board, humanPlayer: Player): number | null => {
   return null; // Status.Ongoing
 }
 
-// tahta dolduysa ve berabereyse - fonksiyon 0 dönüyor
-// kazanan biri varsa - fonksiyon kazanan ai ise +score dönüyor, kazanan player ise -score dönüyor
-// Oyun devam ediyorsa - null dönüyor
-
 const minimax = (board: Board, depth: number, isMaximizer: boolean, humanPlayer: Player): number => {
   let score = evaluateBoard(board, humanPlayer);
   if (score !== null) {
-    console.log("DEPTH", depth);
     if (score > 0) return score - depth;
     if (score < 0) return score + depth;
     return score; // score === 0;
@@ -306,13 +318,12 @@ const minimax = (board: Board, depth: number, isMaximizer: boolean, humanPlayer:
   return bestValue;
 }
 
-const makeCpuMove = (gameState: GameState): void => {
+const makeCpuMove = (gameState: GameState, imposible: boolean): void => {
   if (gameState.status !== Status.Ongoing) {
     return;
   }
 
-  let bestValue = -Infinity;
-  let bestCoordinate: Coordinates = 0;
+  let bestValues: {value: number, coordinate: Coordinates}[] = [];
   let depth = gameState.board.filter(cell => cell !== null).length;
 
   for (let i = 0; i < gameState.board.length; i++) {
@@ -320,15 +331,20 @@ const makeCpuMove = (gameState: GameState): void => {
       const controlBoard: Board = [...gameState.board];
       controlBoard[i] = gameState.humanPlayer === Player.X ? Player.O : Player.X;
       const value = minimax(controlBoard, depth, false, gameState.humanPlayer as Player);
-      console.log("VALUE", value);
-      if (value > bestValue) {
-        bestValue = value;
-        bestCoordinate = i as Coordinates;
-      }
+      bestValues.push({ value: value, coordinate: i as Coordinates });
     }
   }
-  console.log("MARKCELL", bestCoordinate)
-  markCell(gameState, bestCoordinate);
+
+  bestValues.sort((a, b) => b.value - a.value);
+
+  if (gameState.difficulty === Difficulty.Imposible) {
+    console.log("You can’t beat the minimax algorithm 😈");
+    markCell(gameState, bestValues[0]?.coordinate as Coordinates);
+  } else {
+    const randomChoice = Math.floor(bestValues.length * Math.random() ** (gameState.difficulty as number));
+    markCell(gameState, bestValues[randomChoice]?.coordinate as Coordinates);
+  }
+  
 
   // RANDOM
   // while (true) {
@@ -471,7 +487,7 @@ const nextTurn = (
     if (!humanTurn) {
       appElement?.classList.add("ignore-hover"); // Ignore human's hover
       setTimeout(() => {
-        makeCpuMove(gameState);
+        makeCpuMove(gameState, false);
         appElement?.classList.remove("ignore-hover");
       }, 500);
     }
@@ -484,7 +500,7 @@ const nextTurn = (
   }
 }
 
-const startGame = (multiplayer: boolean, player1: Player): void => {
+const startGame = (multiplayer: boolean, player1: Player, difficulty?: Difficulty): void => {
   startElement?.classList.add("hide");
   appElement?.classList.remove("hide");
 
@@ -513,7 +529,8 @@ const startGame = (multiplayer: boolean, player1: Player): void => {
     xPlayer,
     oPlayer,
     multiplayer,
-    humanPlayer: !multiplayer ? player1 : undefined
+    humanPlayer: !multiplayer ? player1 : undefined,
+    difficulty: !multiplayer ? difficulty : undefined
   }
   setPlayerName(gameState);
   setScore(gameState);

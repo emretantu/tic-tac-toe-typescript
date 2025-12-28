@@ -294,6 +294,26 @@ body {
   width: 100%;
 }
 
+.human-vs-cpu-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.human-vs-cpu-container > * {
+  width: 100%;
+}
+
+.difficulty-selection {
+  border-radius: 1rem;
+  padding-block: 0.1rem;
+  text-align: center;
+  background-color: transparent;
+  color: hsl(var(--clr-silver400));
+  font-weight: var(--fw-bold);
+  border-color: hsl(var(--clr-silver500));
+}
+
 .app-container {
   padding: 1.25rem;
   height: 100vh;

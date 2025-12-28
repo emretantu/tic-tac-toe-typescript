@@ -11,6 +11,14 @@ var Status;
     Status["Tie"] = "TIE";
     Status["Ongoing"] = "ONGOING";
 })(Status || (Status = {}));
+var Difficulty;
+(function (Difficulty) {
+    Difficulty[Difficulty["Noob"] = 1] = "Noob";
+    Difficulty[Difficulty["Easy"] = 2] = "Easy";
+    Difficulty[Difficulty["Medium"] = 4] = "Medium";
+    Difficulty[Difficulty["Hard"] = 16] = "Hard";
+    Difficulty[Difficulty["Imposible"] = 0] = "Imposible";
+})(Difficulty || (Difficulty = {}));
 const checkWinner = (board) => {
     const winnerPatterns = [
         [0, 1, 2], [3, 4, 5], [6, 7, 8],
@@ -71,6 +79,7 @@ const startElement = document.querySelector(".start");
 const xSelectionElement = document.querySelector(".start .x-selection");
 const oSelectionElement = document.querySelector(".start .o-selection");
 const humanVsCpuButtonElement = document.querySelector(".start .human-vs-cpu");
+const difficultySelectionElement = document.querySelector(".start .difficulty-selection");
 const multiplayerButtonElement = document.querySelector(".start .multiplayer");
 restartButtonElement === null || restartButtonElement === void 0 ? void 0 : restartButtonElement.addEventListener("click", () => {
     openModal(createModalContent("", "RESTART GAME?", "NO, CANCEL", "YES, RESTART", () => closeModal(modal), () => {
@@ -94,7 +103,25 @@ const getPlayer = () => {
     return (xSelectionElement === null || xSelectionElement === void 0 ? void 0 : xSelectionElement.classList.contains("selected")) ? Player.X : Player.O;
 };
 humanVsCpuButtonElement === null || humanVsCpuButtonElement === void 0 ? void 0 : humanVsCpuButtonElement.addEventListener("click", () => {
-    startGame(false, getPlayer());
+    let difficulty = Difficulty.Medium;
+    switch (difficultySelectionElement === null || difficultySelectionElement === void 0 ? void 0 : difficultySelectionElement.value) {
+        case "noob":
+            difficulty = Difficulty.Noob;
+            break;
+        case "easy":
+            difficulty = Difficulty.Easy;
+            break;
+        case "medium":
+            difficulty = Difficulty.Medium;
+            break;
+        case "hard":
+            difficulty = Difficulty.Hard;
+            break;
+        case "impossible":
+            difficulty = Difficulty.Imposible;
+            break;
+    }
+    startGame(false, getPlayer(), difficulty);
 });
 multiplayerButtonElement === null || multiplayerButtonElement === void 0 ? void 0 : multiplayerButtonElement.addEventListener("click", () => {
     startGame(true, getPlayer());
@@ -182,7 +209,6 @@ const evaluateBoard = (board, humanPlayer) => {
 const minimax = (board, depth, isMaximizer, humanPlayer) => {
     let score = evaluateBoard(board, humanPlayer);
     if (score !== null) {
-        console.log("DEPTH", depth);
         if (score > 0)
             return score - depth;
         if (score < 0)
@@ -212,27 +238,30 @@ const minimax = (board, depth, isMaximizer, humanPlayer) => {
     }
     return bestValue;
 };
-const makeCpuMove = (gameState) => {
+const makeCpuMove = (gameState, imposible) => {
+    var _a, _b;
     if (gameState.status !== Status.Ongoing) {
         return;
     }
-    let bestValue = -Infinity;
-    let bestCoordinate = 0;
+    let bestValues = [];
     let depth = gameState.board.filter(cell => cell !== null).length;
     for (let i = 0; i < gameState.board.length; i++) {
         if (gameState.board[i] === null) {
             const controlBoard = [...gameState.board];
             controlBoard[i] = gameState.humanPlayer === Player.X ? Player.O : Player.X;
             const value = minimax(controlBoard, depth, false, gameState.humanPlayer);
-            console.log("VALUE", value);
-            if (value > bestValue) {
-                bestValue = value;
-                bestCoordinate = i;
-            }
+            bestValues.push({ value: value, coordinate: i });
         }
     }
-    console.log("MARKCELL", bestCoordinate);
-    markCell(gameState, bestCoordinate);
+    bestValues.sort((a, b) => b.value - a.value);
+    if (gameState.difficulty === Difficulty.Imposible) {
+        console.log("You can’t beat the minimax algorithm 😈");
+        markCell(gameState, (_a = bestValues[0]) === null || _a === void 0 ? void 0 : _a.coordinate);
+    }
+    else {
+        const randomChoice = Math.floor(bestValues.length * Math.random() ** gameState.difficulty);
+        markCell(gameState, (_b = bestValues[randomChoice]) === null || _b === void 0 ? void 0 : _b.coordinate);
+    }
 };
 const setTurn = (whoseTurn) => {
     if (whoseTurn === Player.X) {
@@ -352,7 +381,7 @@ const nextTurn = (gameState) => {
         if (!humanTurn) {
             appElement === null || appElement === void 0 ? void 0 : appElement.classList.add("ignore-hover");
             setTimeout(() => {
-                makeCpuMove(gameState);
+                makeCpuMove(gameState, false);
                 appElement === null || appElement === void 0 ? void 0 : appElement.classList.remove("ignore-hover");
             }, 500);
         }
@@ -362,7 +391,7 @@ const nextTurn = (gameState) => {
         resolveRoundEnd(gameState);
     }
 };
-const startGame = (multiplayer, player1) => {
+const startGame = (multiplayer, player1, difficulty) => {
     startElement === null || startElement === void 0 ? void 0 : startElement.classList.add("hide");
     appElement === null || appElement === void 0 ? void 0 : appElement.classList.remove("hide");
     let xPlayer = "";
@@ -389,7 +418,8 @@ const startGame = (multiplayer, player1) => {
         xPlayer,
         oPlayer,
         multiplayer,
-        humanPlayer: !multiplayer ? player1 : undefined
+        humanPlayer: !multiplayer ? player1 : undefined,
+        difficulty: !multiplayer ? difficulty : undefined
     };
     setPlayerName(gameState);
     setScore(gameState);
