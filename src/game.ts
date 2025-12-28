@@ -132,7 +132,7 @@ const startElement = document.querySelector<HTMLElement>(".start");
 const xSelectionElement = document.querySelector<HTMLElement>(".start .x-selection");
 const oSelectionElement = document.querySelector<HTMLElement>(".start .o-selection");
 const humanVsCpuButtonElement = document.querySelector<HTMLElement>(".start .human-vs-cpu");
-const difficultySelectionElement = document.querySelector<HTMLInputElement>(".start .difficulty-selection");
+const difficultySelectionElement = document.querySelector<HTMLSelectElement>(".start .difficulty-selection");
 const multiplayerButtonElement = document.querySelector<HTMLElement>(".start .multiplayer");
 
 
@@ -175,6 +175,10 @@ restartButtonElement?.addEventListener("click", () => {
 
 
 const openStartScreen = () => {
+  const localDifficulty: string = fetchLocalDifficulty() as string;
+  if (localDifficulty) {
+    difficultySelectionElement!.value = localDifficulty;
+  }
   appElement?.classList.add("hide")
   startElement?.classList.remove("hide");
   allowClosing();
@@ -194,14 +198,39 @@ const getPlayer = (): Player => {
   return xSelectionElement?.classList.contains("selected") ? Player.X : Player.O;
 }
 
+const DIFFICULTY_LOCAL_KEY = "tic-tac-toe-difficulty";
+const fetchLocalDifficulty = (): string | null => {
+  const localDifficulty = localStorage.getItem(DIFFICULTY_LOCAL_KEY);
+  return localDifficulty;
+}
+
+const setLocalDifficulty = (difficulty: string): void => {
+  localStorage.setItem(DIFFICULTY_LOCAL_KEY, difficulty);
+}
+
 humanVsCpuButtonElement?.addEventListener("click", () => {
-  let difficulty: Difficulty = Difficulty.Medium; // Default
+  let difficulty: Difficulty = Difficulty.Medium;
   switch(difficultySelectionElement?.value) {
-    case "noob": difficulty = Difficulty.Noob; break;
-    case "easy": difficulty = Difficulty.Easy; break;
-    case "medium": difficulty = Difficulty.Medium; break;
-    case "hard": difficulty = Difficulty.Hard; break;
-    case "impossible": difficulty = Difficulty.Imposible; break;
+    case "noob":
+      difficulty = Difficulty.Noob;
+      setLocalDifficulty("noob");
+      break;
+    case "easy":
+      difficulty = Difficulty.Easy;
+      setLocalDifficulty("easy");
+      break;
+    case "medium":
+      difficulty = Difficulty.Medium;
+      setLocalDifficulty("medium");
+      break;
+    case "hard":
+      difficulty = Difficulty.Hard;
+      setLocalDifficulty("hard");
+      break;
+    case "impossible":
+      difficulty = Difficulty.Imposible;
+      setLocalDifficulty("impossible");
+      break;
   }
   startGame(false, getPlayer(), difficulty);
 });

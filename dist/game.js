@@ -102,6 +102,10 @@ restartButtonElement === null || restartButtonElement === void 0 ? void 0 : rest
     }, ModalStatus.Notr), modal);
 });
 const openStartScreen = () => {
+    const localDifficulty = fetchLocalDifficulty();
+    if (localDifficulty) {
+        difficultySelectionElement.value = localDifficulty;
+    }
     appElement === null || appElement === void 0 ? void 0 : appElement.classList.add("hide");
     startElement === null || startElement === void 0 ? void 0 : startElement.classList.remove("hide");
     allowClosing();
@@ -117,23 +121,36 @@ oSelectionElement === null || oSelectionElement === void 0 ? void 0 : oSelection
 const getPlayer = () => {
     return (xSelectionElement === null || xSelectionElement === void 0 ? void 0 : xSelectionElement.classList.contains("selected")) ? Player.X : Player.O;
 };
+const DIFFICULTY_LOCAL_KEY = "tic-tac-toe-difficulty";
+const fetchLocalDifficulty = () => {
+    const localDifficulty = localStorage.getItem(DIFFICULTY_LOCAL_KEY);
+    return localDifficulty;
+};
+const setLocalDifficulty = (difficulty) => {
+    localStorage.setItem(DIFFICULTY_LOCAL_KEY, difficulty);
+};
 humanVsCpuButtonElement === null || humanVsCpuButtonElement === void 0 ? void 0 : humanVsCpuButtonElement.addEventListener("click", () => {
     let difficulty = Difficulty.Medium;
     switch (difficultySelectionElement === null || difficultySelectionElement === void 0 ? void 0 : difficultySelectionElement.value) {
         case "noob":
             difficulty = Difficulty.Noob;
+            setLocalDifficulty("noob");
             break;
         case "easy":
             difficulty = Difficulty.Easy;
+            setLocalDifficulty("easy");
             break;
         case "medium":
             difficulty = Difficulty.Medium;
+            setLocalDifficulty("medium");
             break;
         case "hard":
             difficulty = Difficulty.Hard;
+            setLocalDifficulty("hard");
             break;
         case "impossible":
             difficulty = Difficulty.Imposible;
+            setLocalDifficulty("impossible");
             break;
     }
     startGame(false, getPlayer(), difficulty);
