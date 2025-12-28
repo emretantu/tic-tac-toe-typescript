@@ -229,13 +229,33 @@ const resolveRoundEnd = (gameState) => {
             modalStatus = ModalStatus.Notr;
             break;
         case Status.XWins:
-            sub = gameState.xPlayer.toUpperCase() + " WINS!";
+            if (gameState.multiplayer) {
+                sub = gameState.xPlayer.toUpperCase() + " WINS!";
+            }
+            else {
+                if (gameState.humanPlayer === Player.X) {
+                    sub = "YO WON!";
+                }
+                else {
+                    sub = "OH NO, YOU LOST...";
+                }
+            }
             message = "TAKES THE ROUND";
             modalStatus = ModalStatus.XTakes;
             break;
         case Status.OWins:
-            sub = gameState.oPlayer.toUpperCase() + " WINS!";
-            ;
+            if (gameState.multiplayer) {
+                sub = gameState.oPlayer.toUpperCase() + " WINS!";
+                ;
+            }
+            else {
+                if (gameState.humanPlayer === Player.O) {
+                    sub = "YO WON!";
+                }
+                else {
+                    sub = "OH NO, YOU LOST...";
+                }
+            }
             message = "TAKES THE ROUND";
             modalStatus = ModalStatus.OTakes;
             break;
