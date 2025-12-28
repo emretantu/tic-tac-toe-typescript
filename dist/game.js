@@ -84,7 +84,7 @@ const createCellElement = (id, isOMarked, isXMarked, isHighlighted) => {
     }
     return element;
 };
-const createCellElements = (gameState, previousCellElements, winnerPatterns) => {
+const createCellElements = (gameState, winnerPatterns, isClickable) => {
     const cellElements = gameState.board.map((cell, index) => {
         let isHighlighted = false;
         if (winnerPatterns) {
@@ -100,17 +100,21 @@ const createCellElements = (gameState, previousCellElements, winnerPatterns) => 
         else {
             cellElement = createCellElement(index, false, false, isHighlighted);
         }
-        cellElement.addEventListener("click", (event) => {
-            const targetElement = event.target;
-            let targetElementId = parseInt(targetElement.dataset.cellId);
-            markCell(gameState, targetElementId, previousCellElements);
-        });
+        if (isClickable) {
+            cellElement.addEventListener("click", (event) => {
+                const targetElement = event.target;
+                let targetElementId = parseInt(targetElement.dataset.cellId);
+                markCell(gameState, targetElementId);
+            });
+        }
         return cellElement;
     });
-    previousCellElements = cellElements;
     return cellElements;
 };
+let previousCellElements = [];
 const drawBoard = (cellElements) => {
+    clearBoard(previousCellElements);
+    previousCellElements = cellElements;
     const reversedElements = cellElements.reverse();
     reversedElements.forEach(cellElement => {
         gridElement === null || gridElement === void 0 ? void 0 : gridElement.prepend(cellElement);
@@ -121,7 +125,7 @@ const clearBoard = (cellElements) => {
         cellElement.remove();
     });
 };
-const markCell = (gameState, id, previousCellElements) => {
+const markCell = (gameState, id) => {
     if (gameState.status !== Status.Ongoing) {
         return;
     }
@@ -129,7 +133,19 @@ const markCell = (gameState, id, previousCellElements) => {
         gameState.board[id] = gameState.currentPlayer;
         gameState.currentPlayer = gameState.currentPlayer === Player.X ? Player.O : Player.X;
     }
-    nextTurn(gameState, previousCellElements);
+    nextTurn(gameState);
+};
+const makeCpuMove = (gameState) => {
+    if (gameState.status !== Status.Ongoing) {
+        return;
+    }
+    while (true) {
+        const randomCoordinate = Math.floor(Math.random() * 10);
+        if (gameState.board[randomCoordinate] === null) {
+            markCell(gameState, randomCoordinate);
+            break;
+        }
+    }
 };
 const setTurn = (whoseTurn) => {
     if (whoseTurn === Player.X) {
@@ -155,10 +171,10 @@ const setScore = (gameState) => {
     oScoreElement.innerHTML = gameState.oScore.toString();
     tieScoreElement.innerHTML = gameState.tieScore.toString();
 };
-const resolveRoundEnd = (gameState, cellElements) => {
+const resolveRoundEnd = (gameState) => {
     const button2Callback = () => {
         nextRound(gameState);
-        nextTurn(gameState, cellElements);
+        nextTurn(gameState);
         modal === null || modal === void 0 ? void 0 : modal.close();
     };
     const button1Callback = () => {
@@ -213,19 +229,37 @@ const nextRound = (gameState) => {
     }
     setScore(gameState);
 };
-const nextTurn = (gameState, previousCellElements) => {
+const nextTurn = (gameState) => {
     const winnerPattern = checkWinner(gameState);
-    if (previousCellElements.length > 0) {
-        clearBoard(previousCellElements);
+    let cellElements;
+    if (gameState.multiplayer) {
+        cellElements = createCellElements(gameState, winnerPattern, true);
+        drawBoard(cellElements);
     }
-    const cellElements = createCellElements(gameState, previousCellElements, winnerPattern);
-    drawBoard(cellElements);
+    else {
+        const humanTurn = gameState.humanPlayer === gameState.currentPlayer;
+        cellElements = createCellElements(gameState, winnerPattern, humanTurn);
+        drawBoard(cellElements);
+        if (!humanTurn) {
+            setTimeout(() => makeCpuMove(gameState), 300);
+        }
+    }
     setTurn(gameState.currentPlayer);
     if (gameState.status !== Status.Ongoing) {
-        resolveRoundEnd(gameState, cellElements);
+        resolveRoundEnd(gameState);
     }
 };
-const startGame = () => {
+const startGame = (multiplayer, player1) => {
+    let xPlayer = "";
+    let oPlayer = "";
+    if (multiplayer) {
+        xPlayer = player1 === Player.X ? "P1" : "P2";
+        oPlayer = player1 === Player.O ? "P1" : "P2";
+    }
+    else {
+        xPlayer = player1 === Player.X ? "YOU" : "CPU";
+        oPlayer = player1 === Player.O ? "YOU" : "CPU";
+    }
     const gameState = {
         board: [
             null, null, null,
@@ -237,13 +271,15 @@ const startGame = () => {
         xScore: 0,
         oScore: 0,
         tieScore: 0,
-        xPlayer: "P1",
-        oPlayer: "P2"
+        xPlayer,
+        oPlayer,
+        multiplayer,
+        humanPlayer: !multiplayer ? player1 : undefined
     };
     setPlayerName(gameState);
     setScore(gameState);
-    nextTurn(gameState, []);
+    nextTurn(gameState);
 };
-startGame();
+startGame(false, Player.X);
 export {};
 //# sourceMappingURL=game.js.map

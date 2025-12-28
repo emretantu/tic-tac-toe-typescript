@@ -370,6 +370,10 @@ body {
   background-color: hsl(var(--clr-orange400));
 }
 
+.name {
+  white-space: nowrap;
+}
+
 .count {
   font-size: 1.25rem;
   letter-spacing: 0.06em;

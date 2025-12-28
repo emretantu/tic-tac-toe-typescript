@@ -23,7 +23,9 @@ type GameState = {
   oScore: number,
   tieScore: number,
   xPlayer: string,
-  oPlayer: string
+  oPlayer: string,
+  multiplayer: boolean,
+  humanPlayer: Player | undefined
 }
 
 // const makeMove = (
@@ -156,8 +158,8 @@ const createCellElement = (
 
 const createCellElements = (
   gameState: GameState,
-  previousCellElements: HTMLElement[],
-  winnerPatterns: [Coordinates, Coordinates, Coordinates] | null
+  winnerPatterns: [Coordinates, Coordinates, Coordinates] | null,
+  isClickable: boolean
 ): HTMLElement[] => {
   const cellElements = gameState.board.map((cell, index) => {
     let isHighlighted: boolean = false;
@@ -173,18 +175,22 @@ const createCellElements = (
     } else {
       cellElement = createCellElement(index, false, false, isHighlighted);
     }
-    cellElement.addEventListener("click", (event) => {
-      const targetElement = event.target as HTMLElement;
-      let targetElementId: number = parseInt(targetElement.dataset.cellId as string);
-      markCell(gameState, targetElementId, previousCellElements);
-    });
+    if (isClickable) {
+      cellElement.addEventListener("click", (event) => {
+        const targetElement = event.target as HTMLElement;
+        let targetElementId: number = parseInt(targetElement.dataset.cellId as string);
+        markCell(gameState, targetElementId);
+      });
+    }
     return cellElement;
   });
-  previousCellElements = cellElements;
   return cellElements;
 }
 
+let previousCellElements: HTMLElement[] = [];
 const drawBoard = (cellElements: HTMLElement[]): void => {
+  clearBoard(previousCellElements);
+  previousCellElements = cellElements;
   const reversedElements = cellElements.reverse();
   reversedElements.forEach(cellElement => {
     gridElement?.prepend(cellElement);
@@ -197,7 +203,7 @@ const clearBoard = (cellElements: HTMLElement[]): void => {
   })
 }
 
-const markCell = (gameState: GameState, id: number, previousCellElements: HTMLElement[]): void => {
+const markCell = (gameState: GameState, id: number): void => {
   if (gameState.status !== Status.Ongoing) {
     return;
   }
@@ -205,7 +211,20 @@ const markCell = (gameState: GameState, id: number, previousCellElements: HTMLEl
     gameState.board[id] = gameState.currentPlayer;
     gameState.currentPlayer = gameState.currentPlayer === Player.X ? Player.O : Player.X;
   }
-  nextTurn(gameState, previousCellElements);
+  nextTurn(gameState);
+}
+
+const makeCpuMove = (gameState: GameState): void => {
+  if (gameState.status !== Status.Ongoing) {
+    return;
+  }
+  while (true) {
+    const randomCoordinate = Math.floor(Math.random() * 10);
+    if (gameState.board[randomCoordinate] === null) {
+      markCell(gameState, randomCoordinate)
+      break;
+    }
+  }
 }
 
 const setTurn = (whoseTurn: Player): void => {
@@ -234,10 +253,10 @@ const setScore = (gameState: GameState) => {
   tieScoreElement!.innerHTML = gameState.tieScore.toString();
 }
 
-const resolveRoundEnd = (gameState: GameState, cellElements: HTMLElement[]) => {
+const resolveRoundEnd = (gameState: GameState) => {
   const button2Callback = () => {
     nextRound(gameState);
-    nextTurn(gameState, cellElements);
+    nextTurn(gameState);
     modal?.close()
   }
   const button1Callback = () => {
@@ -307,22 +326,41 @@ const nextRound = (gameState: GameState): void => {
 
 const nextTurn = (
   gameState: GameState,
-  previousCellElements: HTMLElement[]
 ): void => {
   const winnerPattern = checkWinner(gameState);
-  if (previousCellElements.length > 0) {
-    clearBoard(previousCellElements);
+
+  let cellElements;
+  if (gameState.multiplayer) {
+    cellElements = createCellElements(gameState, winnerPattern, true);
+    drawBoard(cellElements);
+  } else {
+    const humanTurn = gameState.humanPlayer === gameState.currentPlayer;
+    cellElements = createCellElements(gameState, winnerPattern, humanTurn);
+    drawBoard(cellElements);
+    if (!humanTurn) {
+      setTimeout(() => makeCpuMove(gameState), 300);
+    }
   }
-  const cellElements = createCellElements(gameState, previousCellElements, winnerPattern);
-  drawBoard(cellElements);
+
   setTurn(gameState.currentPlayer);
   
   if (gameState.status !== Status.Ongoing) {
-    resolveRoundEnd(gameState, cellElements);
+    resolveRoundEnd(gameState);
   }
 }
 
-const startGame = (): void => {
+const startGame = (multiplayer: boolean, player1: Player): void => {
+  let xPlayer = "";
+  let oPlayer = "";
+  
+  if (multiplayer) {
+    xPlayer = player1 === Player.X ? "P1" : "P2";
+    oPlayer = player1 === Player.O ? "P1" : "P2";
+  } else {
+    xPlayer = player1 === Player.X ? "YOU" : "CPU";
+    oPlayer = player1 === Player.O ? "YOU" : "CPU";
+  }
+
   const gameState: GameState = {
     board: [
       null, null, null,
@@ -334,12 +372,17 @@ const startGame = (): void => {
     xScore: 0,
     oScore: 0,
     tieScore: 0,
-    xPlayer: "P1",
-    oPlayer: "P2"
+    xPlayer,
+    oPlayer,
+    multiplayer,
+    humanPlayer: !multiplayer ? player1 : undefined
   }
   setPlayerName(gameState);
   setScore(gameState);
-  nextTurn(gameState, []);
+  nextTurn(gameState);
 }
 
-startGame();
+startGame(false, Player.X);
+
+// SON KİM BİTİYOR, İKİ DURUMDA DA PROBLEM ÇIKIYOR MU?
+// HUMAN VS CPU YAPINCA NEX TURN'DE PATLIYOR, KONTROL
