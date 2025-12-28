@@ -42,26 +42,23 @@ type GameState = {
 // };
 
 const checkWinner = (
-  gameState: GameState
-): [Coordinates, Coordinates, Coordinates] | null => {
+  board: Board
+): { status: Status, winnerPattern: [Coordinates, Coordinates, Coordinates] | null } => {
   const winnerPatterns: [Coordinates, Coordinates, Coordinates][] = [
     [0, 1, 2], [3, 4, 5], [6, 7, 8], // Horizontal
     [0, 3, 6], [1, 4, 7], [2, 5, 8], // Vertical
     [0, 4, 8], [2, 4, 6] // Diagonal
   ]
   for (const [first, second, third] of winnerPatterns) {
-    if (gameState.board[first] && (gameState.board[first] === gameState.board[second]) && (gameState.board[first] === gameState.board[third])) {
-      const status = gameState.board[first] as unknown as Status;
-      gameState.status = status;
-      return [first, second, third]
+    if (board[first] && (board[first] === board[second]) && (board[first] === board[third])) {
+      const status = board[first] as unknown as Status;
+      return {status, winnerPattern: [first, second, third]}
     }
   }
-  if (!gameState.board.includes(null)) {
-    gameState.status = Status.Tie;
-    return null;
+  if (!board.includes(null)) {
+    return {status: Status.Tie, winnerPattern: null}
   }
-  gameState.status = Status.Ongoing;
-  return null;
+  return {status: Status.Ongoing, winnerPattern: null}
 };
 
 // UI/UX
@@ -258,17 +255,89 @@ const markCell = (gameState: GameState, id: number): void => {
   nextTurn(gameState);
 }
 
+const MAX_DEPTH = 9;
+const BASE_SCORE = MAX_DEPTH + 1;
+
+const evaluateBoard = (board: Board, humanPlayer: Player): number | null => {
+  const {status} = checkWinner(board);
+  switch (status) {
+    case Status.Tie: return 0;
+    case Status.OWins: return humanPlayer === Player.X ? BASE_SCORE : -BASE_SCORE;
+    case Status.XWins: return humanPlayer === Player.X ? -BASE_SCORE : BASE_SCORE;
+  }
+  return null; // Status.Ongoing
+}
+
+// tahta dolduysa ve berabereyse - fonksiyon 0 dönüyor
+// kazanan biri varsa - fonksiyon kazanan ai ise +score dönüyor, kazanan player ise -score dönüyor
+// Oyun devam ediyorsa - null dönüyor
+
+const minimax = (board: Board, depth: number, isMaximizer: boolean, humanPlayer: Player): number => {
+  let score = evaluateBoard(board, humanPlayer);
+  if (score !== null) {
+    console.log("DEPTH", depth);
+    if (score > 0) return score - depth;
+    if (score < 0) return score + depth;
+    return score; // score === 0;
+  }
+
+  let bestValue: number;
+
+  if (isMaximizer) {
+    bestValue = -Infinity;
+    for (let i = 0; i < board.length; i++) {
+      if (board[i] === null) {
+        const newBoard: Board = [...board];
+        newBoard[i] = humanPlayer === Player.X ? Player.O : Player.X;
+        bestValue = Math.max(bestValue, minimax(newBoard, depth+1, false, humanPlayer));
+      } // Else? Terminal node!
+    }
+  } else {
+    bestValue = Infinity;
+    for (let i = 0; i < board.length; i++) {
+      if (board[i] === null) {
+        const newBoard: Board = [...board];
+        newBoard[i] = humanPlayer;
+        bestValue = Math.min(bestValue, minimax(newBoard, depth+1, true, humanPlayer));
+      } // Else? Terminal node!
+    }
+  }
+
+  return bestValue;
+}
+
 const makeCpuMove = (gameState: GameState): void => {
   if (gameState.status !== Status.Ongoing) {
     return;
   }
-  while (true) {
-    const randomCoordinate = Math.floor(Math.random() * 10);
-    if (gameState.board[randomCoordinate] === null) {
-      markCell(gameState, randomCoordinate)
-      break;
+
+  let bestValue = -Infinity;
+  let bestCoordinate: Coordinates = 0;
+  let depth = gameState.board.filter(cell => cell !== null).length;
+
+  for (let i = 0; i < gameState.board.length; i++) {
+    if (gameState.board[i] === null) {
+      const controlBoard: Board = [...gameState.board];
+      controlBoard[i] = gameState.humanPlayer === Player.X ? Player.O : Player.X;
+      const value = minimax(controlBoard, depth, false, gameState.humanPlayer as Player);
+      console.log("VALUE", value);
+      if (value > bestValue) {
+        bestValue = value;
+        bestCoordinate = i as Coordinates;
+      }
     }
   }
+  console.log("MARKCELL", bestCoordinate)
+  markCell(gameState, bestCoordinate);
+
+  // RANDOM
+  // while (true) {
+  //   const randomCoordinate = Math.floor(Math.random() * 10);
+  //   if (gameState.board[randomCoordinate] === null) {
+  //     markCell(gameState, randomCoordinate)
+  //     break;
+  //   }
+  // }
 }
 
 const setTurn = (whoseTurn: Player): void => {
@@ -388,7 +457,8 @@ const nextRound = (gameState: GameState): void => {
 const nextTurn = (
   gameState: GameState,
 ): void => {
-  const winnerPattern = checkWinner(gameState);
+  const {status, winnerPattern} = checkWinner(gameState.board);
+  gameState.status = status;
 
   let cellElements;
   if (gameState.multiplayer) {

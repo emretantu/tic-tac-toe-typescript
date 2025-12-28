@@ -621,6 +621,8 @@ dialog::backdrop {
   .cell {
     border-radius: 1rem;
     background-size: 4rem;
+    padding: 2.375rem;
+    padding-bottom: calc(2.375rem + 0.5rem);
   }
 
   .x-wins, .ties, .o-wins {

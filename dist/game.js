@@ -11,25 +11,22 @@ var Status;
     Status["Tie"] = "TIE";
     Status["Ongoing"] = "ONGOING";
 })(Status || (Status = {}));
-const checkWinner = (gameState) => {
+const checkWinner = (board) => {
     const winnerPatterns = [
         [0, 1, 2], [3, 4, 5], [6, 7, 8],
         [0, 3, 6], [1, 4, 7], [2, 5, 8],
         [0, 4, 8], [2, 4, 6]
     ];
     for (const [first, second, third] of winnerPatterns) {
-        if (gameState.board[first] && (gameState.board[first] === gameState.board[second]) && (gameState.board[first] === gameState.board[third])) {
-            const status = gameState.board[first];
-            gameState.status = status;
-            return [first, second, third];
+        if (board[first] && (board[first] === board[second]) && (board[first] === board[third])) {
+            const status = board[first];
+            return { status, winnerPattern: [first, second, third] };
         }
     }
-    if (!gameState.board.includes(null)) {
-        gameState.status = Status.Tie;
-        return null;
+    if (!board.includes(null)) {
+        return { status: Status.Tie, winnerPattern: null };
     }
-    gameState.status = Status.Ongoing;
-    return null;
+    return { status: Status.Ongoing, winnerPattern: null };
 };
 const modal = document.querySelector("dialog");
 var ModalStatus;
@@ -171,17 +168,71 @@ const markCell = (gameState, id) => {
     }
     nextTurn(gameState);
 };
+const MAX_DEPTH = 9;
+const BASE_SCORE = MAX_DEPTH + 1;
+const evaluateBoard = (board, humanPlayer) => {
+    const { status } = checkWinner(board);
+    switch (status) {
+        case Status.Tie: return 0;
+        case Status.OWins: return humanPlayer === Player.X ? BASE_SCORE : -BASE_SCORE;
+        case Status.XWins: return humanPlayer === Player.X ? -BASE_SCORE : BASE_SCORE;
+    }
+    return null;
+};
+const minimax = (board, depth, isMaximizer, humanPlayer) => {
+    let score = evaluateBoard(board, humanPlayer);
+    if (score !== null) {
+        console.log("DEPTH", depth);
+        if (score > 0)
+            return score - depth;
+        if (score < 0)
+            return score + depth;
+        return score;
+    }
+    let bestValue;
+    if (isMaximizer) {
+        bestValue = -Infinity;
+        for (let i = 0; i < board.length; i++) {
+            if (board[i] === null) {
+                const newBoard = [...board];
+                newBoard[i] = humanPlayer === Player.X ? Player.O : Player.X;
+                bestValue = Math.max(bestValue, minimax(newBoard, depth + 1, false, humanPlayer));
+            }
+        }
+    }
+    else {
+        bestValue = Infinity;
+        for (let i = 0; i < board.length; i++) {
+            if (board[i] === null) {
+                const newBoard = [...board];
+                newBoard[i] = humanPlayer;
+                bestValue = Math.min(bestValue, minimax(newBoard, depth + 1, true, humanPlayer));
+            }
+        }
+    }
+    return bestValue;
+};
 const makeCpuMove = (gameState) => {
     if (gameState.status !== Status.Ongoing) {
         return;
     }
-    while (true) {
-        const randomCoordinate = Math.floor(Math.random() * 10);
-        if (gameState.board[randomCoordinate] === null) {
-            markCell(gameState, randomCoordinate);
-            break;
+    let bestValue = -Infinity;
+    let bestCoordinate = 0;
+    let depth = gameState.board.filter(cell => cell !== null).length;
+    for (let i = 0; i < gameState.board.length; i++) {
+        if (gameState.board[i] === null) {
+            const controlBoard = [...gameState.board];
+            controlBoard[i] = gameState.humanPlayer === Player.X ? Player.O : Player.X;
+            const value = minimax(controlBoard, depth, false, gameState.humanPlayer);
+            console.log("VALUE", value);
+            if (value > bestValue) {
+                bestValue = value;
+                bestCoordinate = i;
+            }
         }
     }
+    console.log("MARKCELL", bestCoordinate);
+    markCell(gameState, bestCoordinate);
 };
 const setTurn = (whoseTurn) => {
     if (whoseTurn === Player.X) {
@@ -287,7 +338,8 @@ const nextRound = (gameState) => {
     setScore(gameState);
 };
 const nextTurn = (gameState) => {
-    const winnerPattern = checkWinner(gameState);
+    const { status, winnerPattern } = checkWinner(gameState.board);
+    gameState.status = status;
     let cellElements;
     if (gameState.multiplayer) {
         cellElements = createCellElements(gameState, winnerPattern, true);
