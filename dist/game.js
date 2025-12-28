@@ -69,11 +69,18 @@ const closeModal = (modal) => {
 };
 const appElement = document.querySelector(".app");
 const gridElement = document.querySelector(".app .grid");
+const restartButtonElement = document.querySelector(".app .restart");
 const startElement = document.querySelector(".start");
 const xSelectionElement = document.querySelector(".start .x-selection");
 const oSelectionElement = document.querySelector(".start .o-selection");
 const humanVsCpuButtonElement = document.querySelector(".start .human-vs-cpu");
 const multiplayerButtonElement = document.querySelector(".start .multiplayer");
+restartButtonElement === null || restartButtonElement === void 0 ? void 0 : restartButtonElement.addEventListener("click", () => {
+    openModal(createModalContent("", "RESTART GAME?", "NO, CANCEL", "YES, RESTART", () => closeModal(modal), () => {
+        openStartScreen();
+        closeModal(modal);
+    }, ModalStatus.Notr), modal);
+});
 const openStartScreen = () => {
     appElement === null || appElement === void 0 ? void 0 : appElement.classList.add("hide");
     startElement === null || startElement === void 0 ? void 0 : startElement.classList.remove("hide");

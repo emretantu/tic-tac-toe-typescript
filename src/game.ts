@@ -122,11 +122,31 @@ const closeModal = (modal: HTMLDialogElement | null) => {
 
 const appElement = document.querySelector<HTMLElement>(".app");
 const gridElement = document.querySelector<HTMLElement>(".app .grid");
+const restartButtonElement = document.querySelector<HTMLElement>(".app .restart");
 const startElement = document.querySelector<HTMLElement>(".start");
 const xSelectionElement = document.querySelector<HTMLElement>(".start .x-selection");
 const oSelectionElement = document.querySelector<HTMLElement>(".start .o-selection");
 const humanVsCpuButtonElement = document.querySelector<HTMLElement>(".start .human-vs-cpu");
 const multiplayerButtonElement = document.querySelector<HTMLElement>(".start .multiplayer");
+
+
+restartButtonElement?.addEventListener("click", () => {
+  openModal(
+    createModalContent(
+      "", 
+      "RESTART GAME?", 
+      "NO, CANCEL", 
+      "YES, RESTART", 
+      () => closeModal(modal), 
+      () => {
+        openStartScreen();
+        closeModal(modal);
+      }, 
+      ModalStatus.Notr
+    ),
+    modal as HTMLDialogElement
+  );
+})
 
 
 const openStartScreen = () => {
