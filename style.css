@@ -540,6 +540,10 @@ dialog::backdrop {
   text-align: center;
 }
 
+.modal-content .message .main .img {
+  display: none;
+}
+
 .modal-content .message.x-takes .main .img,
 .modal-content .message.o-takes .main .img {
   --size: 1.875rem;
@@ -665,6 +669,7 @@ dialog::backdrop {
 
   .modal-content .message.x-takes .main .img,
   .modal-content .message.o-takes .main .img {
+    display: block;
     --size: 4rem;
   }
   
